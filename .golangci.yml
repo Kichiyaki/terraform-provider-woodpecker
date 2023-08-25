@@ -1,0 +1,126 @@
+run:
+  tests: true
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - asasalint
+    - asciicheck
+    - bodyclose
+    - bidichk
+    - exportloopref
+    - depguard
+    - errcheck
+    - gocritic
+    - gosec
+    - gofmt
+    - goimports
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - prealloc
+    - staticcheck
+    - typecheck
+    - unconvert
+    - unused
+    - lll
+    - nestif
+    - thelper
+    - nonamedreturns
+    - gocyclo
+    - gomnd
+    - tenv
+    - testpackage
+    - noctx
+    - tparallel
+    - usestdlibvars
+    - unconvert
+    - makezero
+    - grouper
+    - errname
+    - exhaustive
+    - tagliatelle
+    - contextcheck
+    - gocheckcompilerdirectives
+    - errname
+    - forcetypeassert
+    - durationcheck
+    - predeclared
+    - promlinter
+    - wastedassign
+
+linters-settings:
+  tagliatelle:
+    case:
+      rules:
+        json: camel
+        tfsdk: snake
+  lll:
+    line-length: 150
+  gocyclo:
+    min-complexity: 10
+  depguard:
+    rules:
+      main:
+        files:
+          - "$all"
+        deny:
+          - pkg: reflect
+            desc: Please don't use reflect package
+          - pkg: github.com/pkg/errors
+            desc: Should be replaced by standard lib errors package
+  govet:
+    enable:
+      - asmdecl
+      - assign
+      - atomic
+      - atomicalign
+      - bools
+      - buildtag
+      - cgocall
+      - composites
+      - copylocks
+      - deepequalerrors
+      - errorsas
+      - findcall
+      - framepointer
+      - httpresponse
+      - ifaceassert
+      - loopclosure
+      - lostcancel
+      - nilfunc
+      - nilness
+      - printf
+      - reflectvaluecompare
+      - shadow
+      - shift
+      - sigchanyzer
+      - sortslice
+      - stdmethods
+      - stringintconv
+      - structtag
+      - testinggoroutine
+      - tests
+      - unmarshal
+      - unreachable
+      - unsafeptr
+      - unusedresult
+      - unusedwrite
+  gomnd:
+    ignored-functions:
+      - strconv.FormatInt
+      - strconv.ParseInt
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - dupl
+        - gocyclo
+    - linters:
+        - lll
+      source: "^//go:generate "
