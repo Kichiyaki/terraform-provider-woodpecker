@@ -16,8 +16,9 @@ import (
 type woodpeckerProvider struct {
 	version string
 	client  woodpecker.Client
-	self    *woodpecker.User
 }
+
+var _ provider.Provider = (*woodpeckerProvider)(nil)
 
 func NewProvider(version string) func() provider.Provider {
 	return func() provider.Provider {
@@ -53,7 +54,9 @@ func (p *woodpeckerProvider) Schema(_ context.Context, _ provider.SchemaRequest,
 }
 
 func (p *woodpeckerProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		newUserDataSource,
+	}
 }
 
 func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Resource {
@@ -66,7 +69,7 @@ func (p *woodpeckerProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	p.client, p.self = p.createClient(ctx, cfg, resp)
+	p.client = p.createClient(ctx, cfg, resp)
 
 	resp.DataSourceData = p.client
 	resp.ResourceData = p.client
@@ -88,7 +91,7 @@ func (p *woodpeckerProvider) createProviderConfiguration(
 		return config
 	}
 
-	if config.Server.ValueString() != "" {
+	if config.Server.ValueString() == "" {
 		config.Server = types.StringValue(os.Getenv("WOODPECKER_SERVER"))
 	}
 
@@ -101,7 +104,7 @@ func (p *woodpeckerProvider) createProviderConfiguration(
 		)
 	}
 
-	if config.Token.ValueString() != "" {
+	if config.Token.ValueString() == "" {
 		config.Token = types.StringValue(os.Getenv("WOODPECKER_TOKEN"))
 	}
 
@@ -121,7 +124,7 @@ func (p *woodpeckerProvider) createClient(
 	ctx context.Context,
 	config providerConfig,
 	resp *provider.ConfigureResponse,
-) (woodpecker.Client, *woodpecker.User) {
+) woodpecker.Client {
 	client := woodpecker.NewClient(
 		config.Server.ValueString(),
 		(&oauth2.Config{}).Client(ctx, &oauth2.Token{
@@ -129,11 +132,11 @@ func (p *woodpeckerProvider) createClient(
 		}),
 	)
 
-	self, err := client.Self()
+	_, err := client.Self()
 	if err != nil {
 		resp.Diagnostics.AddError("Unable to login", err.Error())
-		return nil, nil
+		return nil
 	}
 
-	return client, self
+	return client
 }

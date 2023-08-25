@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/Kichiyaki/terraform-provider-woodpecker/internal"
@@ -10,10 +11,18 @@ import (
 
 //nolint:unused
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"scaffolding": providerserver.NewProtocol6WithError(internal.NewProvider("test")()),
+	"woodpecker": providerserver.NewProtocol6WithError(internal.NewProvider("test")()),
 }
 
 //nolint:unused
 func testAccPreCheck(t *testing.T) {
 	t.Helper()
+
+	if v := os.Getenv("WOODPECKER_SERVER"); v == "" {
+		t.Fatal("WOODPECKER_SERVER must be set for tests")
+	}
+
+	if v := os.Getenv("WOODPECKER_TOKEN"); v == "" {
+		t.Fatal("WOODPECKER_TOKEN must be set for tests")
+	}
 }
