@@ -34,7 +34,6 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 
 
 This resource allows you to add/remove users. When applied, a new user will be created. When destroyed, that user will be removed.`,
-
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:    true,
