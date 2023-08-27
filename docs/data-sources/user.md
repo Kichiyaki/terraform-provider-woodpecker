@@ -33,8 +33,8 @@ data "woodpecker_user" "user" {
 
 ### Read-Only
 
-- `active` (Boolean) Whether user is active in the system
-- `admin` (Boolean) Whether user is an admin
+- `active` (Boolean) whether user is active in the system
+- `admin` (Boolean) whether user is an admin
 - `avatar` (String) the user's avatar URL
 - `email` (String) the user's email
 - `id` (Number) the user's id
