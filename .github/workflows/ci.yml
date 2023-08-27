@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     services:
       dind:
@@ -31,4 +31,13 @@ jobs:
       - uses: golangci/golangci-lint-action@v3
         with:
           version: v1.54
-      - run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+      - name: Gitea 1.20 & Woodpecker 1.0
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+        env:
+          GITEA_IMAGE: gitea/gitea:1.20
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v1.0
+      - name: Forgejo 1.20 & Woodpecker 1.0
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+        env:
+          GITEA_IMAGE: codeberg.org/forgejo/forgejo:1.20
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v1.0

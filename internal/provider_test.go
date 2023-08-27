@@ -9,12 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
 
-//nolint:unused
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 	"woodpecker": providerserver.NewProtocol6WithError(internal.NewProvider("test")()),
 }
 
-//nolint:unused
 func testAccPreCheck(t *testing.T) {
 	t.Helper()
 

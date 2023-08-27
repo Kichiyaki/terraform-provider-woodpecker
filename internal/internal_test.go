@@ -26,8 +26,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const resourceExpInSec = 120
-
 var (
 	giteaClient      *gitea.Client
 	woodpeckerClient woodpecker.Client
@@ -55,12 +53,12 @@ func TestMain(m *testing.M) {
 		_ = resourceWoodpecker.Close()
 	})
 
+	woodpeckerClient = newWoodpeckerClient(resourceWoodpecker.httpURL, resourceWoodpecker.token)
+
 	// set required envs
 	_ = os.Setenv("TF_ACC", "1")
 	_ = os.Setenv("WOODPECKER_SERVER", resourceWoodpecker.httpURL.String())
 	_ = os.Setenv("WOODPECKER_TOKEN", resourceWoodpecker.token)
-
-	woodpeckerClient = newWoodpeckerClient(resourceWoodpecker.httpURL, resourceWoodpecker.token)
 
 	code := m.Run()
 
@@ -94,6 +92,8 @@ func newDockerNetwork(pool *dockertest.Pool) *dockertest.Network {
 	return network
 }
 
+const giteaContainerExpInSec = 120
+
 type giteaResource struct {
 	docker         *dockertest.Resource
 	httpURL        *urlpkg.URL
@@ -102,9 +102,10 @@ type giteaResource struct {
 }
 
 func runGitea(pool *dockertest.Pool, network *dockertest.Network) giteaResource {
+	repo, tag := getGiteaRepoTag()
 	gitea, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "gitea/gitea",
-		Tag:        "1.20",
+		Repository: repo,
+		Tag:        tag,
 		Networks:   []*dockertest.Network{network},
 		Env: []string{
 			"GITEA__security__INSTALL_LOCK=true",
@@ -119,7 +120,7 @@ func runGitea(pool *dockertest.Pool, network *dockertest.Network) giteaResource 
 		log.Fatalf("couldn't run gitea: %s", err)
 	}
 
-	if err = gitea.Expire(resourceExpInSec); err != nil {
+	if err = gitea.Expire(giteaContainerExpInSec); err != nil {
 		log.Fatal(err)
 	}
 
@@ -169,6 +170,16 @@ func runGitea(pool *dockertest.Pool, network *dockertest.Network) giteaResource 
 
 func (r giteaResource) Close() error {
 	return r.docker.Close()
+}
+
+const defaultGiteaImage = "gitea/gitea:1.20"
+
+func getGiteaRepoTag() (string, string) {
+	val := os.Getenv("GITEA_IMAGE")
+	if val == "" {
+		val = defaultGiteaImage
+	}
+	return docker.ParseRepositoryTag(val)
 }
 
 func createGiteaUser(pool *dockertest.Pool, gitea *dockertest.Resource) *urlpkg.Userinfo {
@@ -224,6 +235,8 @@ type woodpeckerResource struct {
 	token   string
 }
 
+const woodpeckerContainerExpInSec = 120
+
 func runWoodpecker(
 	pool *dockertest.Pool,
 	network *dockertest.Network,
@@ -245,9 +258,10 @@ func runWoodpecker(
 		log.Fatalln("couldn't create oauth2 app:", err)
 	}
 
+	repo, tag := getWoodpeckerRepoTag()
 	woodpecker, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "woodpeckerci/woodpecker-server",
-		Tag:        "v1.0.2",
+		Repository: repo,
+		Tag:        tag,
 		Networks:   []*dockertest.Network{network},
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"8000/tcp": {
@@ -281,7 +295,7 @@ func runWoodpecker(
 		log.Fatalf("couldn't run woodpecker: %s", err)
 	}
 
-	if err = woodpecker.Expire(resourceExpInSec); err != nil {
+	if err = woodpecker.Expire(woodpeckerContainerExpInSec); err != nil {
 		log.Fatal(err)
 	}
 
@@ -322,6 +336,16 @@ func runWoodpecker(
 
 func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
+}
+
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v1.0.2"
+
+func getWoodpeckerRepoTag() (string, string) {
+	val := os.Getenv("WOODPECKER_IMAGE")
+	if val == "" {
+		val = defaultWoodpeckerImage
+	}
+	return docker.ParseRepositoryTag(val)
 }
 
 type woodpeckerTokenProvider struct {
@@ -444,7 +468,9 @@ func (p woodpeckerTokenProvider) do(req *http.Request) *http.Response {
 		log.Fatalf("request to %s failed: %s", req.URL.String(), err)
 	}
 	if resp.StatusCode/100 != 2 { // accept only 2XX requests
-		log.Fatalf("request to %s failed", req.URL.String())
+		b, _ := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		log.Fatalf("request to %s failed (status code = %d): %s", req.URL.String(), resp.StatusCode, b)
 	}
 
 	return resp
@@ -461,7 +487,7 @@ func (p woodpeckerTokenProvider) getCSRFTokenFromCookies(cookies []*http.Cookie)
 
 func (p woodpeckerTokenProvider) readCSRFTokenFromWoodpeckerWebConfig(r io.Reader) string {
 	defer func() {
-		// discard the remaining bytes
+		// discard remaining bytes
 		_, _ = io.Copy(io.Discard, r)
 	}()
 

@@ -64,12 +64,12 @@ func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Reso
 }
 
 func (p *woodpeckerProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	cfg := p.createProviderConfiguration(ctx, req, resp)
+	cfg := newProviderConfig(ctx, req, resp)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	p.client = p.createClient(ctx, cfg, resp)
+	p.client = newClient(ctx, cfg, resp)
 
 	resp.DataSourceData = p.client
 	resp.ResourceData = p.client
@@ -80,7 +80,7 @@ type providerConfig struct {
 	Token  types.String `tfsdk:"token"`
 }
 
-func (p *woodpeckerProvider) createProviderConfiguration(
+func newProviderConfig(
 	ctx context.Context,
 	req provider.ConfigureRequest,
 	resp *provider.ConfigureResponse,
@@ -120,7 +120,7 @@ func (p *woodpeckerProvider) createProviderConfiguration(
 	return config
 }
 
-func (p *woodpeckerProvider) createClient(
+func newClient(
 	ctx context.Context,
 	config providerConfig,
 	resp *provider.ConfigureResponse,
