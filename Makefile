@@ -6,6 +6,7 @@ GOBIN := $(shell go env GOPATH)/bin
 endif
 OSARCH=$(shell uname -m)
 GOLANGCI_LINT_PATH=$(GOBIN)/golangci-lint
+TFPLUGINDOCS_PATH=$(GOBIN)/tfplugindocs
 
 .PHONY: install-git-hooks
 install-git-hooks:
@@ -15,8 +16,8 @@ install-git-hooks:
 
 .PHONY: install-tfplugindocs
 install-tfplugindocs:
-	@echo "Installing github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs..."
-	@go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.16.0
+	@echo "Installing github.com/hashicorp/terraform-plugin-docs..."
+	@(test -f $(TFPLUGINDOCS_PATH) && echo "github.com/hashicorp/terraform-plugin-docs is already installed. Skipping...") || (wget -q -O $(TFPLUGINDOCS_PATH).zip https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.16.0/tfplugindocs_0.16.0_$(GOOS)_$(GOARCH).zip && unzip $(TFPLUGINDOCS_PATH).zip tfplugindocs -d $(GOBIN) && rm $(TFPLUGINDOCS_PATH).zip)
 
 .PHONY: install-golangci-lint
 install-golangci-lint:

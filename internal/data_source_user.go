@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
@@ -15,27 +14,10 @@ type userDataSource struct {
 }
 
 var _ datasource.DataSource = (*userDataSource)(nil)
+var _ datasource.DataSourceWithConfigure = (*userDataSource)(nil)
 
 func newUserDataSource() datasource.DataSource {
 	return &userDataSource{}
-}
-
-type userDataSourceModel struct {
-	ID     types.Int64  `tfsdk:"id"`
-	Login  types.String `tfsdk:"login"`
-	Email  types.String `tfsdk:"email"`
-	Avatar types.String `tfsdk:"avatar"`
-	Active types.Bool   `tfsdk:"active"`
-	Admin  types.Bool   `tfsdk:"admin"`
-}
-
-func (m *userDataSourceModel) setValues(user *woodpecker.User) {
-	m.ID = types.Int64Value(user.ID)
-	m.Login = types.StringValue(user.Login)
-	m.Email = types.StringValue(user.Email)
-	m.Avatar = types.StringValue(user.Avatar)
-	m.Active = types.BoolValue(user.Active)
-	m.Admin = types.BoolValue(user.Admin)
 }
 
 func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -44,7 +26,6 @@ func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequ
 
 func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Use this data source to retrieve information about a user.",
 
 		Attributes: map[string]schema.Attribute{
@@ -66,17 +47,17 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			},
 			"active": schema.BoolAttribute{
 				Computed:    true,
-				Description: "Whether user is active in the system",
+				Description: "whether user is active in the system",
 			},
 			"admin": schema.BoolAttribute{
 				Computed:    true,
-				Description: "Whether user is an admin",
+				Description: "whether user is an admin",
 			},
 		},
 	}
 }
 
-func (d *userDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -95,9 +76,8 @@ func (d *userDataSource) Configure(ctx context.Context, req datasource.Configure
 }
 
 func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data userDataSourceModel
+	var data userModel
 
-	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -117,6 +97,5 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	data.setValues(user)
 
-	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

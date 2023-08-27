@@ -15,7 +15,6 @@ import (
 
 type woodpeckerProvider struct {
 	version string
-	client  woodpecker.Client
 }
 
 var _ provider.Provider = (*woodpeckerProvider)(nil)
@@ -60,7 +59,9 @@ func (p *woodpeckerProvider) DataSources(_ context.Context) []func() datasource.
 }
 
 func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		newUserResource,
+	}
 }
 
 func (p *woodpeckerProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -69,10 +70,10 @@ func (p *woodpeckerProvider) Configure(ctx context.Context, req provider.Configu
 		return
 	}
 
-	p.client = newClient(ctx, cfg, resp)
+	client := newClient(ctx, cfg, resp)
 
-	resp.DataSourceData = p.client
-	resp.ResourceData = p.client
+	resp.DataSourceData = client
+	resp.ResourceData = client
 }
 
 type providerConfig struct {
