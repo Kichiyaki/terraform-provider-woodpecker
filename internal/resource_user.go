@@ -95,13 +95,22 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	user, err := r.client.UserPost(data.toWoodpeckerModel())
+	wData, diags := data.toWoodpeckerModel(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	user, err := r.client.UserPost(wData)
 	if err != nil {
 		resp.Diagnostics.AddError("Couldn't create user", err.Error())
 		return
 	}
 
-	data.setValues(user)
+	resp.Diagnostics.Append(data.setValues(ctx, user)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -119,7 +128,10 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		resp.Diagnostics.AddError("Couldn't get user", err.Error())
 	}
 
-	data.setValues(user)
+	resp.Diagnostics.Append(data.setValues(ctx, user)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -132,13 +144,22 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	user, err := r.client.UserPatch(data.toWoodpeckerModel())
+	wData, diags := data.toWoodpeckerModel(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	user, err := r.client.UserPatch(wData)
 	if err != nil {
 		resp.Diagnostics.AddError("Couldn't update user", err.Error())
 		return
 	}
 
-	data.setValues(user)
+	resp.Diagnostics.Append(data.setValues(ctx, user)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -155,6 +176,10 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		resp.Diagnostics.AddError("Couldn't delete user", err.Error())
 		return
 	}
+
+	// If execution completes without error, the framework will automatically
+	// call DeleteResponse.State.RemoveResource(), so it can be omitted
+	// from provider logic.
 }
 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
