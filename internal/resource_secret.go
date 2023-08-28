@@ -98,7 +98,7 @@ func (r *secretResource) Configure(_ context.Context, req resource.ConfigureRequ
 }
 
 func (r *secretResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data secretModel
+	var data secretResourceModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -126,7 +126,7 @@ func (r *secretResource) Create(ctx context.Context, req resource.CreateRequest,
 }
 
 func (r *secretResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data secretModel
+	var data secretResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -147,7 +147,7 @@ func (r *secretResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (r *secretResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data secretModel
+	var data secretResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -175,7 +175,7 @@ func (r *secretResource) Update(ctx context.Context, req resource.UpdateRequest,
 }
 
 func (r *secretResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data secretModel
+	var data secretResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {

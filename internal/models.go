@@ -38,7 +38,7 @@ func (m *userModel) toWoodpeckerModel(_ context.Context) (*woodpecker.User, diag
 	}, nil
 }
 
-type secretModel struct {
+type secretResourceModel struct {
 	ID          types.Int64  `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Value       types.String `tfsdk:"value"`
@@ -47,7 +47,7 @@ type secretModel struct {
 	Events      types.Set    `tfsdk:"events"`
 }
 
-func (m *secretModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+func (m *secretResourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
 	var diagsRes diag.Diagnostics
 	var diags diag.Diagnostics
 
@@ -62,7 +62,7 @@ func (m *secretModel) setValues(ctx context.Context, secret *woodpecker.Secret) 
 	return diagsRes
 }
 
-func (m *secretModel) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret, diag.Diagnostics) {
+func (m *secretResourceModel) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	secret := &woodpecker.Secret{
@@ -75,4 +75,27 @@ func (m *secretModel) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
 
 	return secret, diags
+}
+
+type secretDataSourceModel struct {
+	ID          types.Int64  `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Images      types.Set    `tfsdk:"images"`
+	PluginsOnly types.Bool   `tfsdk:"plugins_only"`
+	Events      types.Set    `tfsdk:"events"`
+}
+
+func (m *secretDataSourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+	var diagsRes diag.Diagnostics
+	var diags diag.Diagnostics
+
+	m.ID = types.Int64Value(secret.ID)
+	m.Name = types.StringValue(secret.Name)
+	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
+	diagsRes.Append(diags...)
+	m.PluginsOnly = types.BoolValue(secret.PluginsOnly)
+	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
+	diagsRes.Append(diags...)
+
+	return diagsRes
 }
