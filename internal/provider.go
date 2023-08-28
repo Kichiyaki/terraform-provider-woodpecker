@@ -55,6 +55,7 @@ func (p *woodpeckerProvider) Schema(_ context.Context, _ provider.SchemaRequest,
 func (p *woodpeckerProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newUserDataSource,
+		newSecretDataSource,
 	}
 }
 
