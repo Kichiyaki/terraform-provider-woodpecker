@@ -94,7 +94,10 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	data.setValues(user)
+	resp.Diagnostics.Append(data.setValues(ctx, user)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

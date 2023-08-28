@@ -6,6 +6,7 @@ require (
 	code.gitea.io/sdk/gitea v0.15.1-0.20230815151548-091528835fc2
 	github.com/google/uuid v1.3.1
 	github.com/hashicorp/terraform-plugin-framework v1.3.5
+	github.com/hashicorp/terraform-plugin-framework-validators v0.11.0
 	github.com/hashicorp/terraform-plugin-go v0.18.0
 	github.com/hashicorp/terraform-plugin-testing v1.4.0
 	github.com/ory/dockertest/v3 v3.10.0
