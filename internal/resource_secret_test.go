@@ -64,12 +64,12 @@ resource "woodpecker_secret" "test_secret" {
 						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "images.*", "testimage"),
 					),
 				},
-				{ // fields shouldn't be overridden
+				{ // update secret
 					Config: fmt.Sprintf(`
 resource "woodpecker_secret" "test_secret" {
 	name = "%s"
 	value = "test123123"
-	events = ["push", "deployment"]
+	events = ["push", "deployment", "cron"]
 }
 //`, name),
 					Check: resource.ComposeAggregateTestCheckFunc(
@@ -78,6 +78,7 @@ resource "woodpecker_secret" "test_secret" {
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "value", "test123123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "push"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "deployment"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "cron"),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "plugins_only", "true"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "images.*", "testimage"),
 					),
@@ -121,7 +122,7 @@ resource "woodpecker_secret" "test_secret" {
 			PreCheck:                 func() { testAccPreCheck(t) },
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 			Steps: []resource.TestStep{
-				{ // create secret
+				{
 					Config: fmt.Sprintf(`
 resource "woodpecker_secret" "test_secret" {
 	name = "%s"

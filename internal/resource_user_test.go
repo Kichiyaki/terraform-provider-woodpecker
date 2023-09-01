@@ -34,9 +34,9 @@ resource "woodpecker_user" "test_user" {
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", login),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", ""),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar", ""),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "active", "false"),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "admin", "false"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", ""),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "false"),
 				),
 			},
 			{ // update user
@@ -44,32 +44,33 @@ resource "woodpecker_user" "test_user" {
 resource "woodpecker_user" "test_user" {
 	login  = "%s"
 	email  = "%s@localhost"
-	avatar = "http://localhost/%s"
-	admin  = true
+	avatar_url = "http://localhost/%s"
+	is_admin  = true
 }
 `, login, login, login),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", login),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", login+"@localhost"),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar", "http://localhost/"+login),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "active", "false"),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "admin", "true"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", "http://localhost/"+login),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "true"),
 				),
 			},
-			{ // fields shouldn't be overridden
+			{ // update user
 				Config: fmt.Sprintf(`
 resource "woodpecker_user" "test_user" {
 	login  = "%s"
+	is_admin = false
 }
 `, login),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", login),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", login+"@localhost"),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar", "http://localhost/"+login),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "active", "false"),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "admin", "true"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", "http://localhost/"+login),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "false"),
 				),
 			},
 			{ // import
@@ -93,9 +94,9 @@ resource "woodpecker_user" "test_user" {
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", newLogin),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", ""),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar", ""),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "active", "false"),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "admin", "false"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", ""),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
+					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "false"),
 				),
 			},
 		},

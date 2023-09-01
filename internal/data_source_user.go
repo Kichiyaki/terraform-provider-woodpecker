@@ -40,15 +40,15 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:    true,
 				Description: "the user's email",
 			},
-			"avatar": schema.StringAttribute{
+			"avatar_url": schema.StringAttribute{
 				Computed:    true,
 				Description: "the user's avatar URL",
 			},
-			"active": schema.BoolAttribute{
+			"is_active": schema.BoolAttribute{
 				Computed:    true,
 				Description: "whether user is active in the system",
 			},
-			"admin": schema.BoolAttribute{
+			"is_admin": schema.BoolAttribute{
 				Computed:    true,
 				Description: "whether user is an admin",
 			},
