@@ -49,3 +49,11 @@ resource "woodpecker_repository" "test_repo" {
 - `owner` (String) the owner of the repository
 - `scm` (String) type of repository (see [the source code](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/const.go#L67))
 - `url` (String) the URL of the repository on the forge
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import woodpecker_secret.test "<owner>/<repo>"
+```

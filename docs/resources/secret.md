@@ -38,3 +38,11 @@ resource "woodpecker_secret" "test" {
 ### Read-Only
 
 - `id` (Number) the secret's id
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import woodpecker_secret.test "<name>"
+```

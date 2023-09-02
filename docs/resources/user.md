@@ -41,3 +41,11 @@ resource "woodpecker_user" "test" {
 
 - `id` (Number) the user's id
 - `is_active` (Boolean) whether user is active in the system
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import woodpecker_user.test "<login>"
+```
