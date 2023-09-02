@@ -33,11 +33,11 @@ resource "woodpecker_user" "test" {
 
 ### Optional
 
-- `admin` (Boolean) whether user is an admin
-- `avatar` (String) the user's avatar URL
+- `avatar_url` (String) the user's avatar URL
 - `email` (String) the email of the user
+- `is_admin` (Boolean) whether user is an admin
 
 ### Read-Only
 
-- `active` (Boolean) whether user is active in the system
 - `id` (Number) the user's id
+- `is_active` (Boolean) whether user is active in the system

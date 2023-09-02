@@ -63,6 +63,7 @@ func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		newUserResource,
 		newSecretResource,
+		newRepositoryResource,
 	}
 }
 
@@ -137,7 +138,7 @@ func newClient(
 
 	_, err := client.Self()
 	if err != nil {
-		resp.Diagnostics.AddError("Unable to login", err.Error())
+		resp.Diagnostics.AddError("Couldn't get current user", err.Error())
 		return nil
 	}
 

@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
@@ -38,6 +40,9 @@ This resource allows you to add/remove users. When applied, a new user will be c
 			"id": schema.Int64Attribute{
 				Computed:    true,
 				Description: "the user's id",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"login": schema.StringAttribute{
 				Required:    true,
@@ -50,20 +55,32 @@ This resource allows you to add/remove users. When applied, a new user will be c
 				Optional:    true,
 				Computed:    true,
 				Description: "the email of the user",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
-			"avatar": schema.StringAttribute{
+			"avatar_url": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "the user's avatar URL",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
-			"active": schema.BoolAttribute{
+			"is_active": schema.BoolAttribute{
 				Computed:    true,
 				Description: "whether user is active in the system",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
-			"admin": schema.BoolAttribute{
+			"is_admin": schema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "whether user is an admin",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
