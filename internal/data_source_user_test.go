@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestDataSourceUser(t *testing.T) {
+func TestUserDataSource(t *testing.T) {
 	t.Parallel()
 
 	user, _ := woodpeckerClient.Self()

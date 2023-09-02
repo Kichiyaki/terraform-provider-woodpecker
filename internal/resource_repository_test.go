@@ -16,7 +16,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-func TestResourceRepository(t *testing.T) {
+func TestRepositoryResource(t *testing.T) {
 	t.Parallel()
 
 	t.Run("OK", func(t *testing.T) {

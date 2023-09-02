@@ -13,7 +13,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-func TestResourceUser(t *testing.T) {
+func TestUserResource(t *testing.T) {
 	t.Parallel()
 
 	login := uuid.NewString()

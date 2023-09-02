@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestDataSourceSecret(t *testing.T) {
+func TestSecretDataSource(t *testing.T) {
 	t.Parallel()
 
 	name := uuid.NewString()

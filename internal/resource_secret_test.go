@@ -14,7 +14,7 @@ import (
 	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
 )
 
-func TestResourceSecret(t *testing.T) {
+func TestSecretResource(t *testing.T) {
 	t.Parallel()
 
 	t.Run("OK", func(t *testing.T) {
