@@ -14,7 +14,7 @@ Provides a repository resource.
 
 ```terraform
 resource "woodpecker_repository" "test_repo" {
-  full_name  = "%s"
+  full_name  = "Kichiyaki/test-repo"
   is_trusted = true
   visibility = "public"
 }
