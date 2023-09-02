@@ -233,3 +233,17 @@ func createRepo(tb testing.TB) *gitea.Repository {
 
 	return repo
 }
+
+func activateRepo(tb testing.TB, giteaRepo *gitea.Repository) *woodpecker.Repo {
+	tb.Helper()
+
+	repo, err := woodpeckerClient.RepoPost(giteaRepo.ID)
+	if err != nil {
+		tb.Fatalf("got unexpected error while activating repo: %s", err)
+	}
+	tb.Cleanup(func() {
+		_ = woodpeckerClient.RepoDel(repo.ID)
+	})
+
+	return repo
+}
