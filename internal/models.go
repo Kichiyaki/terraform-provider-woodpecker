@@ -153,3 +153,43 @@ func (m *repositoryModel) toWoodpeckerPatch(ctx context.Context) (*woodpecker.Re
 		AllowPull:  m.AllowPullRequests.ValueBoolPointer(),
 	}, nil
 }
+
+type repositorySecretResourceModel struct {
+	ID           types.Int64  `tfsdk:"id"`
+	RepositoryID types.Int64  `tfsdk:"repository_id"`
+	Name         types.String `tfsdk:"name"`
+	Value        types.String `tfsdk:"value"`
+	Images       types.Set    `tfsdk:"images"`
+	PluginsOnly  types.Bool   `tfsdk:"plugins_only"`
+	Events       types.Set    `tfsdk:"events"`
+}
+
+func (m *repositorySecretResourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+	var diagsRes diag.Diagnostics
+	var diags diag.Diagnostics
+
+	m.ID = types.Int64Value(secret.ID)
+	m.Name = types.StringValue(secret.Name)
+	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
+	diagsRes.Append(diags...)
+	m.PluginsOnly = types.BoolValue(secret.PluginsOnly)
+	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
+	diagsRes.Append(diags...)
+
+	return diagsRes
+}
+
+func (m *repositorySecretResourceModel) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	secret := &woodpecker.Secret{
+		ID:          m.ID.ValueInt64(),
+		Name:        m.Name.ValueString(),
+		Value:       m.Value.ValueString(),
+		PluginsOnly: m.PluginsOnly.ValueBool(),
+	}
+	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, false)...)
+	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
+
+	return secret, diags
+}
