@@ -29,7 +29,7 @@ func TestRepositorySecretResource(t *testing.T) {
 		resource.Test(t, resource.TestCase{
 			PreCheck:                 func() { testAccPreCheck(t) },
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-			CheckDestroy:             testAccCheckRepositorySecretResourceDestroy(repo.ID, name, newName),
+			CheckDestroy:             checkRepositorySecretResourceDestroy(repo.ID, name, newName),
 			Steps: []resource.TestStep{
 				{ // create secret
 					Config: fmt.Sprintf(`
@@ -149,7 +149,7 @@ resource "woodpecker_repository_secret" "test_secret" {
 	})
 }
 
-func testAccCheckRepositorySecretResourceDestroy(repoID int64, names ...string) func(state *terraform.State) error {
+func checkRepositorySecretResourceDestroy(repoID int64, names ...string) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
 		secrets, err := woodpeckerClient.SecretList(repoID)
 		if err != nil {

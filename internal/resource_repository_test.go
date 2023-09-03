@@ -27,7 +27,7 @@ func TestRepositoryResource(t *testing.T) {
 		resource.Test(t, resource.TestCase{
 			PreCheck:                 func() { testAccPreCheck(t) },
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-			CheckDestroy:             testAccCheckRepositoryResourceDestroy(repo1.FullName, repo2.FullName),
+			CheckDestroy:             checkRepositoryResourceDestroy(repo1.FullName, repo2.FullName),
 			Steps: []resource.TestStep{
 				{ // create repo
 					Config: fmt.Sprintf(`
@@ -197,7 +197,7 @@ resource "woodpecker_repository" "test_repo" {
 	})
 }
 
-func testAccCheckRepositoryResourceDestroy(names ...string) func(state *terraform.State) error {
+func checkRepositoryResourceDestroy(names ...string) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
 		repos, err := woodpeckerClient.RepoListOpts(true, true)
 		if err != nil {
@@ -230,6 +230,9 @@ func createRepo(tb testing.TB) *gitea.Repository {
 	if err != nil {
 		tb.Fatalf("got unexpected error while creating repo: %s", err)
 	}
+	tb.Cleanup(func() {
+		_, _ = giteaClient.DeleteRepo(repo.Owner.UserName, repo.Name)
+	})
 
 	return repo
 }

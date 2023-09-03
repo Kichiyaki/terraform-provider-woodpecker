@@ -22,7 +22,7 @@ func TestUserResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckUserResourceDestroy(login, newLogin),
+		CheckDestroy:             checkUserResourceDestroy(login, newLogin),
 		Steps: []resource.TestStep{
 			{ // create user
 				Config: fmt.Sprintf(`
@@ -103,7 +103,7 @@ resource "woodpecker_user" "test_user" {
 	})
 }
 
-func testAccCheckUserResourceDestroy(logins ...string) func(state *terraform.State) error {
+func checkUserResourceDestroy(logins ...string) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
 		users, err := woodpeckerClient.UserList()
 		if err != nil {
