@@ -219,7 +219,7 @@ func (r *repositorySecretResource) Delete(ctx context.Context, req resource.Dele
 }
 
 func (r *repositorySecretResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, "/")
+	idParts := strings.Split(req.ID, importStateIDSeparator)
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(

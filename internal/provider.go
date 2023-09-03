@@ -13,6 +13,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const importStateIDSeparator = "/"
+
 type woodpeckerProvider struct {
 	version string
 }
@@ -67,6 +69,7 @@ func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Reso
 		newSecretResource,
 		newRepositoryResource,
 		newRepositorySecretResource,
+		newRepositoryCronResource,
 	}
 }
 

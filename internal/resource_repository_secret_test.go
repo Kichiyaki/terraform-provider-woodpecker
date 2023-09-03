@@ -22,6 +22,7 @@ func TestRepositorySecretResource(t *testing.T) {
 		t.Parallel()
 
 		repo := activateRepo(t, createRepo(t))
+		newRepo := activateRepo(t, createRepo(t))
 
 		name := uuid.NewString()
 		newName := uuid.NewString()
@@ -29,7 +30,10 @@ func TestRepositorySecretResource(t *testing.T) {
 		resource.Test(t, resource.TestCase{
 			PreCheck:                 func() { testAccPreCheck(t) },
 			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-			CheckDestroy:             checkRepositorySecretResourceDestroy(repo.ID, name, newName),
+			CheckDestroy: checkRepositorySecretResourceDestroy(map[int64][]string{
+				repo.ID:    {name, newName},
+				newRepo.ID: {name, newName},
+			}),
 			Steps: []resource.TestStep{
 				{ // create secret
 					Config: fmt.Sprintf(`
@@ -99,7 +103,7 @@ resource "woodpecker_repository_secret" "test_secret" {
 					ImportStateVerify:       true,
 					ImportStateVerifyIgnore: []string{"value"},
 				},
-				{ // replace secret
+				{ // replace secret (new name)
 					Config: fmt.Sprintf(`
 resource "woodpecker_repository_secret" "test_secret" {
 	repository_id = %d
@@ -116,6 +120,29 @@ resource "woodpecker_repository_secret" "test_secret" {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(repo.ID, 10)),
+						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", newName),
+						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123New"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
+						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "plugins_only", "false"),
+					),
+				},
+				{ // replace secret (new repo id)
+					Config: fmt.Sprintf(`
+resource "woodpecker_repository_secret" "test_secret" {
+	repository_id = %d
+	name = "%s"
+	value = "test123New"
+	events = ["push"]
+}
+`, newRepo.ID, newName),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction("woodpecker_repository_secret.test_secret", plancheck.ResourceActionReplace),
+						},
+					},
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
+						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(newRepo.ID, 10)),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", newName),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123New"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
@@ -149,17 +176,19 @@ resource "woodpecker_repository_secret" "test_secret" {
 	})
 }
 
-func checkRepositorySecretResourceDestroy(repoID int64, names ...string) func(state *terraform.State) error {
+func checkRepositorySecretResourceDestroy(m map[int64][]string) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
-		secrets, err := woodpeckerClient.SecretList(repoID)
-		if err != nil {
-			return fmt.Errorf("couldn't list secrets: %w", err)
-		}
+		for repoID, names := range m {
+			secrets, err := woodpeckerClient.SecretList(repoID)
+			if err != nil {
+				return fmt.Errorf("couldn't list secrets: %w", err)
+			}
 
-		if slices.ContainsFunc(secrets, func(secret *woodpecker.Secret) bool {
-			return slices.Contains(names, secret.Name)
-		}) {
-			return errors.New("at least one of the created secrets isn't deleted")
+			if slices.ContainsFunc(secrets, func(secret *woodpecker.Secret) bool {
+				return slices.Contains(names, secret.Name)
+			}) {
+				return errors.New("at least one of the created secrets isn't deleted")
+			}
 		}
 
 		return nil
