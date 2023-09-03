@@ -217,3 +217,36 @@ func (m *repositorySecretDataSourceModel) setValues(ctx context.Context, secret 
 
 	return diagsRes
 }
+
+type repositoryCronModel struct {
+	ID           types.Int64  `tfsdk:"id"`
+	Name         types.String `tfsdk:"name"`
+	RepositoryID types.Int64  `tfsdk:"repository_id"`
+	CreatorID    types.Int64  `tfsdk:"creator_id"`
+	Schedule     types.String `tfsdk:"schedule"`
+	CreatedAt    types.Int64  `tfsdk:"created_at"`
+	Branch       types.String `tfsdk:"branch"`
+}
+
+func (m *repositoryCronModel) setValues(_ context.Context, cron *woodpecker.Cron) diag.Diagnostics {
+	m.ID = types.Int64Value(cron.ID)
+	m.Name = types.StringValue(cron.Name)
+	m.RepositoryID = types.Int64Value(cron.RepoID)
+	m.CreatorID = types.Int64Value(cron.CreatorID)
+	m.Schedule = types.StringValue(cron.Schedule)
+	m.CreatedAt = types.Int64Value(cron.Created)
+	m.Branch = types.StringValue(cron.Branch)
+	return nil
+}
+
+func (m *repositoryCronModel) toWoodpeckerModel(_ context.Context) (*woodpecker.Cron, diag.Diagnostics) {
+	return &woodpecker.Cron{
+		ID:        m.ID.ValueInt64(),
+		Name:      m.Name.ValueString(),
+		RepoID:    m.RepositoryID.ValueInt64(),
+		CreatorID: m.CreatorID.ValueInt64(),
+		Schedule:  m.Schedule.ValueString(),
+		Created:   m.CreatedAt.ValueInt64(),
+		Branch:    m.Branch.ValueString(),
+	}, nil
+}

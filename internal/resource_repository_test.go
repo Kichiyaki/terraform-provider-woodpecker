@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"testing"
 
-	"code.gitea.io/sdk/gitea"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -212,41 +211,4 @@ func checkRepositoryResourceDestroy(names ...string) func(state *terraform.State
 
 		return nil
 	}
-}
-
-func createRepo(tb testing.TB) *gitea.Repository {
-	tb.Helper()
-
-	repo, _, err := giteaClient.CreateRepo(gitea.CreateRepoOption{
-		Name:          uuid.NewString(),
-		Description:   uuid.NewString(),
-		Private:       false,
-		AutoInit:      true,
-		Template:      false,
-		License:       "MIT",
-		Readme:        "Default",
-		DefaultBranch: "master",
-	})
-	if err != nil {
-		tb.Fatalf("got unexpected error while creating repo: %s", err)
-	}
-	tb.Cleanup(func() {
-		_, _ = giteaClient.DeleteRepo(repo.Owner.UserName, repo.Name)
-	})
-
-	return repo
-}
-
-func activateRepo(tb testing.TB, giteaRepo *gitea.Repository) *woodpecker.Repo {
-	tb.Helper()
-
-	repo, err := woodpeckerClient.RepoPost(giteaRepo.ID)
-	if err != nil {
-		tb.Fatalf("got unexpected error while activating repo: %s", err)
-	}
-	tb.Cleanup(func() {
-		_ = woodpeckerClient.RepoDel(repo.ID)
-	})
-
-	return repo
 }
