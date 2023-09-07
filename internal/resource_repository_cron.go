@@ -33,7 +33,7 @@ func (r *repositoryCronResource) Metadata(_ context.Context, req resource.Metada
 
 func (r *repositoryCronResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "This resource allows you to add/remove cron jobs." +
+		MarkdownDescription: "This resource allows you to add/remove cron jobs for specific repositories." +
 			" When applied, a new cron job will be created." +
 			" When destroyed, that cron job will be removed." +
 			" For more information see [the Woodpecker docs](https://woodpecker-ci.org/docs/usage/cron).",

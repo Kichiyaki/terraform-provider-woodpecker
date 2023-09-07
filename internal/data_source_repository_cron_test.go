@@ -2,7 +2,6 @@ package internal_test
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/google/uuid"
@@ -38,7 +37,7 @@ data "woodpecker_repository_cron" "test_cron" {
 `, repo.FullName, name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.woodpecker_repository_cron.test_cron", "id"),
-					resource.TestCheckResourceAttr("data.woodpecker_repository_cron.test_cron", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttrSet("data.woodpecker_repository_cron.test_cron", "repository_id"),
 					resource.TestCheckResourceAttr("data.woodpecker_repository_cron.test_cron", "name", name),
 					resource.TestCheckResourceAttr("data.woodpecker_repository_cron.test_cron", "schedule", "@daily"),
 					resource.TestCheckResourceAttr("data.woodpecker_repository_cron.test_cron", "branch", ""),

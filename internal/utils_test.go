@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"sync"
 	"testing"
 
 	"code.gitea.io/sdk/gitea"
@@ -44,8 +45,15 @@ func createBranch(tb testing.TB, repo *gitea.Repository) *gitea.Branch {
 	return branch
 }
 
+var activateRepoMu sync.Mutex
+
 func activateRepo(tb testing.TB, giteaRepo *gitea.Repository) *woodpecker.Repo {
 	tb.Helper()
+
+	// there is a problem in Woodpecker with activating multiple repos from the same owner at the same time
+	// UNIQUE constraint failed: orgs.name
+	activateRepoMu.Lock()
+	defer activateRepoMu.Unlock()
 
 	repo, err := woodpeckerClient.RepoPost(giteaRepo.ID)
 	if err != nil {

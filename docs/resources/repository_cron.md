@@ -3,12 +3,12 @@
 page_title: "woodpecker_repository_cron Resource - terraform-provider-woodpecker"
 subcategory: ""
 description: |-
-  This resource allows you to add/remove cron jobs. When applied, a new cron job will be created. When destroyed, that cron job will be removed. For more information see the Woodpecker docs https://woodpecker-ci.org/docs/usage/cron.
+  This resource allows you to add/remove cron jobs for specific repositories. When applied, a new cron job will be created. When destroyed, that cron job will be removed. For more information see the Woodpecker docs https://woodpecker-ci.org/docs/usage/cron.
 ---
 
 # woodpecker_repository_cron (Resource)
 
-This resource allows you to add/remove cron jobs. When applied, a new cron job will be created. When destroyed, that cron job will be removed. For more information see [the Woodpecker docs](https://woodpecker-ci.org/docs/usage/cron).
+This resource allows you to add/remove cron jobs for specific repositories. When applied, a new cron job will be created. When destroyed, that cron job will be removed. For more information see [the Woodpecker docs](https://woodpecker-ci.org/docs/usage/cron).
 
 ## Example Usage
 
