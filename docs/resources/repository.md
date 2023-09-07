@@ -55,5 +55,5 @@ resource "woodpecker_repository" "test_repo" {
 Import is supported using the following syntax:
 
 ```shell
-terraform import woodpecker_secret.test "<owner>/<repo>"
+terraform import woodpecker_repository.test "<owner>/<repo>"
 ```

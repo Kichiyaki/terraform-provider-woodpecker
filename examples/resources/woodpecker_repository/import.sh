@@ -1,1 +1,1 @@
-terraform import woodpecker_secret.test "<owner>/<repo>"
+terraform import woodpecker_repository.test "<owner>/<repo>"
