@@ -61,6 +61,7 @@ func (p *woodpeckerProvider) DataSources(_ context.Context) []func() datasource.
 		newRepositoryDataSource,
 		newRepositorySecretDataSource,
 		newRepositoryCronDataSource,
+		newRepositoryRegistryDataSource,
 	}
 }
 
