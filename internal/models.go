@@ -143,7 +143,7 @@ func (m *repositoryModel) setValues(_ context.Context, repo *woodpecker.Repo) di
 	return nil
 }
 
-func (m *repositoryModel) toWoodpeckerPatch(ctx context.Context) (*woodpecker.RepoPatch, diag.Diagnostics) {
+func (m *repositoryModel) toWoodpeckerPatch(_ context.Context) (*woodpecker.RepoPatch, diag.Diagnostics) {
 	return &woodpecker.RepoPatch{
 		Config:     m.ConfigFile.ValueStringPointer(),
 		IsTrusted:  m.IsTrusted.ValueBoolPointer(),
@@ -248,5 +248,32 @@ func (m *repositoryCronModel) toWoodpeckerModel(_ context.Context) (*woodpecker.
 		Schedule:  m.Schedule.ValueString(),
 		Created:   m.CreatedAt.ValueInt64(),
 		Branch:    m.Branch.ValueString(),
+	}, nil
+}
+
+type repositoryRegistryModel struct {
+	ID           types.Int64  `tfsdk:"id"`
+	RepositoryID types.Int64  `tfsdk:"repository_id"`
+	Address      types.String `tfsdk:"address"`
+	Username     types.String `tfsdk:"username"`
+	Password     types.String `tfsdk:"password"`
+	Email        types.String `tfsdk:"email"`
+}
+
+func (m *repositoryRegistryModel) setValues(_ context.Context, registry *woodpecker.Registry) diag.Diagnostics {
+	m.ID = types.Int64Value(registry.ID)
+	m.Address = types.StringValue(registry.Address)
+	m.Username = types.StringValue(registry.Username)
+	m.Email = types.StringValue(registry.Email)
+	return nil
+}
+
+func (m *repositoryRegistryModel) toWoodpeckerModel(_ context.Context) (*woodpecker.Registry, diag.Diagnostics) {
+	return &woodpecker.Registry{
+		ID:       m.ID.ValueInt64(),
+		Address:  m.Address.ValueString(),
+		Username: m.Username.ValueString(),
+		Password: m.Password.ValueString(),
+		Email:    m.Email.ValueString(),
 	}, nil
 }
