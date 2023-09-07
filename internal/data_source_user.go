@@ -90,7 +90,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		user, err = d.client.Self()
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Couldn't read user data", err.Error())
+		resp.Diagnostics.AddError("Couldn't get user data", err.Error())
 		return
 	}
 

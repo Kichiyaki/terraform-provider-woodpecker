@@ -137,7 +137,7 @@ func (d *repositoryDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 	repo, err := d.client.RepoLookup(data.FullName.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Couldn't read repository data", err.Error())
+		resp.Diagnostics.AddError("Couldn't get repository data", err.Error())
 		return
 	}
 

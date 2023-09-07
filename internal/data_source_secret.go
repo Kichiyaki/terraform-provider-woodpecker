@@ -83,7 +83,7 @@ func (d *secretDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	secret, err := d.client.GlobalSecret(data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Couldn't read secret data", err.Error())
+		resp.Diagnostics.AddError("Couldn't get secret data", err.Error())
 		return
 	}
 
