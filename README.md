@@ -1,4 +1,4 @@
-# Terraform Provider for Woodpecker CI
+# Terraform Provider for Woodpecker CI [![Actions Status](https://github.com/Kichiyaki/terraform-provider-woodpecker/actions/workflows/ci.yml/badge.svg)](https://github.com/Kichiyaki/terraform-provider-woodpecker/actions/workflows/ci.yml)[![GitHub tag](https://img.shields.io/github/v/tag/Kichiyaki/terraform-provider-woodpecker?label=release)](https://github.com/Kichiyaki/terraform-provider-woodpecker/releases)[![license](https://img.shields.io/github/license/Kichiyaki/terraform-provider-woodpecker.svg)](https://github.com/Kichiyaki/terraform-provider-woodpecker/blob/master/LICENSE)
 
 A Terraform provider used to interact with [Woodpecker CI](https://woodpecker-ci.org/) resources.
 
