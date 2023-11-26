@@ -29,7 +29,11 @@ data "woodpecker_repository" "test_repo" {
 `, repo.FullName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.woodpecker_repository.test_repo", "id"),
-					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "forge_remote_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"data.woodpecker_repository.test_repo",
+						"forge_remote_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "name", repo.Name),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "owner", repo.Owner.UserName),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "full_name", repo.FullName),
@@ -39,7 +43,11 @@ data "woodpecker_repository" "test_repo" {
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "scm", "git"),
 					resource.TestCheckResourceAttrSet("data.woodpecker_repository.test_repo", "timeout"),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "visibility", "public"),
-					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "is_private", strconv.FormatBool(repo.Private)),
+					resource.TestCheckResourceAttr(
+						"data.woodpecker_repository.test_repo",
+						"is_private",
+						strconv.FormatBool(repo.Private),
+					),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "is_trusted", "false"),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "is_gated", "false"),
 					resource.TestCheckResourceAttr("data.woodpecker_repository.test_repo", "allow_pull_requests", "true"),

@@ -43,7 +43,11 @@ resource "woodpecker_repository_registry" "test_registry" {
 `, repo.ID, address),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_registry.test_registry", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_registry.test_registry",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", address),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test"),
@@ -61,7 +65,11 @@ resource "woodpecker_repository_registry" "test_registry" {
 `, repo.ID, address),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_registry.test_registry", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_registry.test_registry",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", address),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test2"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test2"),
@@ -79,7 +87,11 @@ resource "woodpecker_repository_registry" "test_registry" {
 //`, repo.ID, address),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_registry.test_registry", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_registry.test_registry",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", address),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test"),
@@ -104,12 +116,19 @@ resource "woodpecker_repository_registry" "test_registry" {
 `, repo.ID, newAddress),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("woodpecker_repository_registry.test_registry", plancheck.ResourceActionReplace),
+						plancheck.ExpectResourceAction(
+							"woodpecker_repository_registry.test_registry",
+							plancheck.ResourceActionReplace,
+						),
 					},
 				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_registry.test_registry", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_registry.test_registry",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", newAddress),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test"),
@@ -131,7 +150,11 @@ resource "woodpecker_repository_registry" "test_registry" {
 				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_registry.test_registry", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "repository_id", strconv.FormatInt(newRepo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_registry.test_registry",
+						"repository_id",
+						strconv.FormatInt(newRepo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", newAddress),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test"),

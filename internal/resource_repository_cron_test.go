@@ -42,7 +42,11 @@ resource "woodpecker_repository_cron" "test_cron" {
 `, repo.ID, name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_cron.test_cron", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_cron.test_cron",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "name", name),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "schedule", "@daily"),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "branch", ""),
@@ -61,7 +65,11 @@ resource "woodpecker_repository_cron" "test_cron" {
 `, repo.ID, name, branch.Name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_cron.test_cron", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_cron.test_cron",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "name", name),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "schedule", "@every 5m"),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "branch", branch.Name),
@@ -79,7 +87,11 @@ resource "woodpecker_repository_cron" "test_cron" {
 //`, repo.ID, name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_cron.test_cron", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "repository_id", strconv.FormatInt(repo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_cron.test_cron",
+						"repository_id",
+						strconv.FormatInt(repo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "name", name),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "schedule", "@daily"),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "branch", branch.Name),
@@ -108,7 +120,11 @@ resource "woodpecker_repository_cron" "test_cron" {
 				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_repository_cron.test_cron", "id"),
-					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "repository_id", strconv.FormatInt(newRepo.ID, 10)),
+					resource.TestCheckResourceAttr(
+						"woodpecker_repository_cron.test_cron",
+						"repository_id",
+						strconv.FormatInt(newRepo.ID, 10),
+					),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "name", name),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "schedule", "@daily"),
 					resource.TestCheckResourceAttr("woodpecker_repository_cron.test_cron", "branch", ""),

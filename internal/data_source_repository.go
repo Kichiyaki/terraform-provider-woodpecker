@@ -20,11 +20,19 @@ func newRepositoryDataSource() datasource.DataSource {
 	return &repositoryDataSource{}
 }
 
-func (d *repositoryDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *repositoryDataSource) Metadata(
+	_ context.Context,
+	req datasource.MetadataRequest,
+	resp *datasource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository"
 }
 
-func (d *repositoryDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *repositoryDataSource) Schema(
+	_ context.Context,
+	_ datasource.SchemaRequest,
+	resp *datasource.SchemaResponse,
+) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Use this data source to retrieve information about a repository.",
 		Attributes: map[string]schema.Attribute{
@@ -91,8 +99,9 @@ func (d *repositoryDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 				Description: "when true, every pipeline needs to be approved before being executed",
 			},
 			"allow_pull_requests": schema.BoolAttribute{
-				Computed:    true,
-				Description: "Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.",
+				Computed: true,
+				Description: "Enables handling webhook's pull request event." +
+					" If disabled, then pipeline won't run for pull requests.",
 			},
 			"config_file": schema.StringAttribute{
 				Computed: true,
@@ -103,13 +112,18 @@ func (d *repositoryDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 			"netrc_only_trusted": schema.BoolAttribute{
 				Computed: true,
 				MarkdownDescription: "whether netrc credentials should be only injected into trusted containers, " +
+					//nolint:lll
 					"see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers) for more info",
 			},
 		},
 	}
 }
 
-func (d *repositoryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *repositoryDataSource) Configure(
+	_ context.Context,
+	req datasource.ConfigureRequest,
+	resp *datasource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -119,7 +133,10 @@ func (d *repositoryDataSource) Configure(_ context.Context, req datasource.Confi
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}

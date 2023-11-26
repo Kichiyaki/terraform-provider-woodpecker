@@ -268,7 +268,9 @@ func (m *repositoryRegistryResourceModel) setValues(_ context.Context, registry 
 	return nil
 }
 
-func (m *repositoryRegistryResourceModel) toWoodpeckerModel(_ context.Context) (*woodpecker.Registry, diag.Diagnostics) {
+func (m *repositoryRegistryResourceModel) toWoodpeckerModel(
+	_ context.Context,
+) (*woodpecker.Registry, diag.Diagnostics) {
 	return &woodpecker.Registry{
 		ID:       m.ID.ValueInt64(),
 		Address:  m.Address.ValueString(),
@@ -286,7 +288,10 @@ type repositoryRegistryDataSourceModel struct {
 	Email        types.String `tfsdk:"email"`
 }
 
-func (m *repositoryRegistryDataSourceModel) setValues(_ context.Context, registry *woodpecker.Registry) diag.Diagnostics {
+func (m *repositoryRegistryDataSourceModel) setValues(
+	_ context.Context,
+	registry *woodpecker.Registry,
+) diag.Diagnostics {
 	m.ID = types.Int64Value(registry.ID)
 	m.Address = types.StringValue(registry.Address)
 	m.Username = types.StringValue(registry.Username)

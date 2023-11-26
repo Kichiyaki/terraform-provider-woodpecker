@@ -31,7 +31,11 @@ func newRepositoryResource() resource.Resource {
 	return &repositoryResource{}
 }
 
-func (r *repositoryResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *repositoryResource) Metadata(
+	_ context.Context,
+	req resource.MetadataRequest,
+	resp *resource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository"
 }
 
@@ -157,9 +161,10 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				},
 			},
 			"allow_pull_requests": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.",
+				Optional: true,
+				Computed: true,
+				Description: "Enables handling webhook's pull request event." +
+					" If disabled, then pipeline won't run for pull requests.",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -190,8 +195,10 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			"netrc_only_trusted": schema.BoolAttribute{
 				Optional: true,
 				Computed: true,
-				MarkdownDescription: "whether netrc credentials should be only injected into trusted containers, " +
-					"see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers) for more info",
+				MarkdownDescription: "whether netrc credentials should be only injected into trusted containers, see" +
+					//nolint:lll
+					" [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers)" +
+					" for more info",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -200,7 +207,11 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 	}
 }
 
-func (r *repositoryResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *repositoryResource) Configure(
+	_ context.Context,
+	req resource.ConfigureRequest,
+	resp *resource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -210,7 +221,10 @@ func (r *repositoryResource) Configure(_ context.Context, req resource.Configure
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -342,6 +356,10 @@ func (r *repositoryResource) Delete(ctx context.Context, req resource.DeleteRequ
 	// from provider logic.
 }
 
-func (r *repositoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *repositoryResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("full_name"), req.ID)...)
 }

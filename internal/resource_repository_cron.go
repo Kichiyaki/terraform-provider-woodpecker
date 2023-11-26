@@ -27,7 +27,11 @@ func newRepositoryCronResource() resource.Resource {
 	return &repositoryCronResource{}
 }
 
-func (r *repositoryCronResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *repositoryCronResource) Metadata(
+	_ context.Context,
+	req resource.MetadataRequest,
+	resp *resource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository_cron"
 }
 
@@ -86,7 +90,11 @@ func (r *repositoryCronResource) Schema(_ context.Context, _ resource.SchemaRequ
 	}
 }
 
-func (r *repositoryCronResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *repositoryCronResource) Configure(
+	_ context.Context,
+	req resource.ConfigureRequest,
+	resp *resource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -96,7 +104,10 @@ func (r *repositoryCronResource) Configure(_ context.Context, req resource.Confi
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -104,7 +115,11 @@ func (r *repositoryCronResource) Configure(_ context.Context, req resource.Confi
 	r.client = client
 }
 
-func (r *repositoryCronResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *repositoryCronResource) Create(
+	ctx context.Context,
+	req resource.CreateRequest,
+	resp *resource.CreateResponse,
+) {
 	var data repositoryCronModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -153,7 +168,11 @@ func (r *repositoryCronResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *repositoryCronResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *repositoryCronResource) Update(
+	ctx context.Context,
+	req resource.UpdateRequest,
+	resp *resource.UpdateResponse,
+) {
 	var data repositoryCronModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -181,7 +200,11 @@ func (r *repositoryCronResource) Update(ctx context.Context, req resource.Update
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *repositoryCronResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *repositoryCronResource) Delete(
+	ctx context.Context,
+	req resource.DeleteRequest,
+	resp *resource.DeleteResponse,
+) {
 	var data repositoryCronModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -197,7 +220,11 @@ func (r *repositoryCronResource) Delete(ctx context.Context, req resource.Delete
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *repositoryCronResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *repositoryCronResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	idParts := strings.Split(req.ID, importStateIDSeparator)
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {

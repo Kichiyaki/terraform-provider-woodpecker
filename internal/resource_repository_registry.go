@@ -27,11 +27,19 @@ func newRepositoryRegistryResource() resource.Resource {
 	return &repositoryRegistryResource{}
 }
 
-func (r *repositoryRegistryResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *repositoryRegistryResource) Metadata(
+	_ context.Context,
+	req resource.MetadataRequest,
+	resp *resource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository_registry"
 }
 
-func (r *repositoryRegistryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *repositoryRegistryResource) Schema(
+	_ context.Context,
+	_ resource.SchemaRequest,
+	resp *resource.SchemaResponse,
+) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "This resource allows you to add/remove container registries for specific repositories." +
 			" When applied, a new registry will be created." +
@@ -80,7 +88,11 @@ func (r *repositoryRegistryResource) Schema(_ context.Context, _ resource.Schema
 	}
 }
 
-func (r *repositoryRegistryResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *repositoryRegistryResource) Configure(
+	_ context.Context,
+	req resource.ConfigureRequest,
+	resp *resource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -90,7 +102,10 @@ func (r *repositoryRegistryResource) Configure(_ context.Context, req resource.C
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -98,7 +113,11 @@ func (r *repositoryRegistryResource) Configure(_ context.Context, req resource.C
 	r.client = client
 }
 
-func (r *repositoryRegistryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *repositoryRegistryResource) Create(
+	ctx context.Context,
+	req resource.CreateRequest,
+	resp *resource.CreateResponse,
+) {
 	var data repositoryRegistryResourceModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -154,7 +173,11 @@ func (r *repositoryRegistryResource) Read(ctx context.Context, req resource.Read
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *repositoryRegistryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *repositoryRegistryResource) Update(
+	ctx context.Context,
+	req resource.UpdateRequest,
+	resp *resource.UpdateResponse,
+) {
 	var data repositoryRegistryResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -182,7 +205,11 @@ func (r *repositoryRegistryResource) Update(ctx context.Context, req resource.Up
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *repositoryRegistryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *repositoryRegistryResource) Delete(
+	ctx context.Context,
+	req resource.DeleteRequest,
+	resp *resource.DeleteResponse,
+) {
 	var data repositoryRegistryResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -198,7 +225,11 @@ func (r *repositoryRegistryResource) Delete(ctx context.Context, req resource.De
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *repositoryRegistryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *repositoryRegistryResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	idParts := strings.Split(req.ID, importStateIDSeparator)
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
