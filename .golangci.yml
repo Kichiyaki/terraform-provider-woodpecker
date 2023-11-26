@@ -1,6 +1,8 @@
 run:
   tests: true
   timeout: 5m
+  skip-dirs:
+    - internal/woodpecker
 
 linters:
   disable-all: true

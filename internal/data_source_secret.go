@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 type secretDataSource struct {
@@ -45,11 +45,6 @@ func (d *secretDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 				ElementType: types.StringType,
 				Computed:    true,
 				Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
-			},
-			"plugins_only": schema.BoolAttribute{
-				Computed: true,
-				MarkdownDescription: "whether secret is only available for " +
-					"[plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
 			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,

@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 func TestRepositorySecretResource(t *testing.T) {
@@ -54,7 +54,6 @@ resource "woodpecker_repository_secret" "test_secret" {
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "plugins_only", "false"),
 					),
 				},
 				{ // update secret
@@ -64,7 +63,6 @@ resource "woodpecker_repository_secret" "test_secret" {
 	name = "%s"
 	value = "test123123"
 	events = ["push", "deployment"]
-	plugins_only = true
 	images = ["testimage"]
 }
 `, repo.ID, name),
@@ -79,7 +77,6 @@ resource "woodpecker_repository_secret" "test_secret" {
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "deployment"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "plugins_only", "true"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "images.*", "testimage"),
 					),
 				},
@@ -104,7 +101,6 @@ resource "woodpecker_repository_secret" "test_secret" {
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "deployment"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "cron"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "plugins_only", "true"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "images.*", "testimage"),
 					),
 				},
@@ -139,7 +135,6 @@ resource "woodpecker_repository_secret" "test_secret" {
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", newName),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123New"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "plugins_only", "false"),
 					),
 				},
 				{ // replace secret (new repo id)
@@ -166,7 +161,6 @@ resource "woodpecker_repository_secret" "test_secret" {
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", newName),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123New"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "plugins_only", "false"),
 					),
 				},
 			},

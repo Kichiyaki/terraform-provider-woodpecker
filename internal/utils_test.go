@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"code.gitea.io/sdk/gitea"
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/google/uuid"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 func createRepo(tb testing.TB) *gitea.Repository {

@@ -30,4 +30,3 @@ data "woodpecker_secret" "test_secret" {
 - `events` (Set of String) events for which the secret is available (push, tag, pull_request, deployment, cron, manual)
 - `id` (Number) the secret's id
 - `images` (Set of String) list of Docker images for which this secret is available
-- `plugins_only` (Boolean) whether secret is only available for [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)
