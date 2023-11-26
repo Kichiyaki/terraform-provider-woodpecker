@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -18,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 type repositorySecretResource struct {
@@ -28,6 +28,7 @@ type repositorySecretResource struct {
 var _ resource.Resource = (*repositorySecretResource)(nil)
 var _ resource.ResourceWithConfigure = (*repositorySecretResource)(nil)
 var _ resource.ResourceWithImportState = (*repositorySecretResource)(nil)
+var _ resource.ResourceWithUpgradeState = (*repositorySecretResource)(nil)
 
 func newRepositorySecretResource() resource.Resource {
 	return &repositorySecretResource{}
@@ -91,15 +92,6 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 					setplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"plugins_only": schema.BoolAttribute{
-				Optional: true,
-				Computed: true,
-				MarkdownDescription: "whether secret is only available for" +
-					" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
@@ -110,6 +102,7 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 				},
 			},
 		},
+		Version: 1,
 	}
 }
 
@@ -143,7 +136,7 @@ func (r *repositorySecretResource) Create(
 	req resource.CreateRequest,
 	resp *resource.CreateResponse,
 ) {
-	var data repositorySecretResourceModel
+	var data repositorySecretResourceModelV1
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -171,7 +164,7 @@ func (r *repositorySecretResource) Create(
 }
 
 func (r *repositorySecretResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data repositorySecretResourceModel
+	var data repositorySecretResourceModelV1
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -196,7 +189,7 @@ func (r *repositorySecretResource) Update(
 	req resource.UpdateRequest,
 	resp *resource.UpdateResponse,
 ) {
-	var data repositorySecretResourceModel
+	var data repositorySecretResourceModelV1
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -228,7 +221,7 @@ func (r *repositorySecretResource) Delete(
 	req resource.DeleteRequest,
 	resp *resource.DeleteResponse,
 ) {
-	var data repositorySecretResourceModel
+	var data repositorySecretResourceModelV1
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -266,4 +259,94 @@ func (r *repositorySecretResource) ImportState(
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("repository_id"), repoID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), idParts[1])...)
+}
+
+func (r *repositorySecretResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
+		0: {
+			// remove plugins_only attribute
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.Int64Attribute{
+						Computed:    true,
+						Description: "the secret's id",
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
+					},
+					"repository_id": schema.Int64Attribute{
+						Required:    true,
+						Description: "the ID of the repository",
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.RequiresReplace(),
+						},
+					},
+					"name": schema.StringAttribute{
+						Required:    true,
+						Description: "the name of the secret",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"value": schema.StringAttribute{
+						Required:    true,
+						Description: "the value of the secret",
+						Sensitive:   true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"events": schema.SetAttribute{
+						ElementType: types.StringType,
+						Required:    true,
+						Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
+						Validators: []validator.Set{
+							setvalidator.ValueStringsAre(
+								stringvalidator.OneOfCaseInsensitive("push", "tag", "pull_request", "deployment", "cron", "manual"),
+							),
+						},
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"plugins_only": schema.BoolAttribute{
+						Optional: true,
+						Computed: true,
+						MarkdownDescription: "whether secret is only available for" +
+							" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"images": schema.SetAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+						Computed:    true,
+						Description: "list of Docker images for which this secret is available, leave blank to allow all images",
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var priorStateData repositorySecretResourceModelV0
+
+				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				resp.Diagnostics.Append(resp.State.Set(ctx, repositorySecretResourceModelV1{
+					ID:           priorStateData.ID,
+					RepositoryID: priorStateData.RepositoryID,
+					Name:         priorStateData.Name,
+					Value:        priorStateData.Value,
+					Images:       priorStateData.Images,
+					Events:       priorStateData.Events,
+				})...)
+			},
+		},
+	}
 }

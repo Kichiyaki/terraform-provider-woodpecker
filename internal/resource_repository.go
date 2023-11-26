@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -16,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 type repositoryResource struct {
@@ -242,7 +242,7 @@ func (r *repositoryResource) Create(ctx context.Context, req resource.CreateRequ
 
 	repoFullName := data.FullName.ValueString()
 
-	repos, err := r.client.RepoListOpts(true, true)
+	repos, err := r.client.RepoListOpts(true)
 	if err != nil {
 		resp.Diagnostics.AddError("Couldn't list repositories", err.Error())
 		return

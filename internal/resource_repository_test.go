@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 func TestRepositoryResource(t *testing.T) {
@@ -230,7 +230,7 @@ resource "woodpecker_repository" "test_repo" {
 
 func checkRepositoryResourceDestroy(names ...string) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
-		repos, err := woodpeckerClient.RepoListOpts(true, true)
+		repos, err := woodpeckerClient.RepoListOpts(true)
 		if err != nil {
 			return fmt.Errorf("couldn't list repos: %w", err)
 		}

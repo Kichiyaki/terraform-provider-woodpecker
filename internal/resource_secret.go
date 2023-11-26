@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -16,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 type secretResource struct {
@@ -26,6 +26,7 @@ type secretResource struct {
 var _ resource.Resource = (*secretResource)(nil)
 var _ resource.ResourceWithConfigure = (*secretResource)(nil)
 var _ resource.ResourceWithImportState = (*secretResource)(nil)
+var _ resource.ResourceWithUpgradeState = (*secretResource)(nil)
 
 func newSecretResource() resource.Resource {
 	return &secretResource{}
@@ -77,15 +78,6 @@ func (r *secretResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 					setplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"plugins_only": schema.BoolAttribute{
-				Optional: true,
-				Computed: true,
-				MarkdownDescription: "whether secret is only available for" +
-					" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
@@ -96,6 +88,7 @@ func (r *secretResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				},
 			},
 		},
+		Version: 1,
 	}
 }
 
@@ -121,7 +114,7 @@ func (r *secretResource) Configure(_ context.Context, req resource.ConfigureRequ
 }
 
 func (r *secretResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data secretResourceModel
+	var data secretResourceModelV1
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -149,7 +142,7 @@ func (r *secretResource) Create(ctx context.Context, req resource.CreateRequest,
 }
 
 func (r *secretResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data secretResourceModel
+	var data secretResourceModelV1
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -170,7 +163,7 @@ func (r *secretResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (r *secretResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data secretResourceModel
+	var data secretResourceModelV1
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -198,7 +191,7 @@ func (r *secretResource) Update(ctx context.Context, req resource.UpdateRequest,
 }
 
 func (r *secretResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data secretResourceModel
+	var data secretResourceModelV1
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -219,4 +212,86 @@ func (r *secretResource) ImportState(
 	resp *resource.ImportStateResponse,
 ) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), req.ID)...)
+}
+
+func (r *secretResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
+		0: {
+			// remove plugins_only attribute
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.Int64Attribute{
+						Computed:    true,
+						Description: "the secret's id",
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
+					},
+					"name": schema.StringAttribute{
+						Required:    true,
+						Description: "the name of the secret",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"value": schema.StringAttribute{
+						Required:    true,
+						Description: "the value of the secret",
+						Sensitive:   true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"events": schema.SetAttribute{
+						ElementType: types.StringType,
+						Required:    true,
+						Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
+						Validators: []validator.Set{
+							setvalidator.ValueStringsAre(
+								stringvalidator.OneOfCaseInsensitive("push", "tag", "pull_request", "deployment", "cron", "manual"),
+							),
+						},
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"plugins_only": schema.BoolAttribute{
+						Optional: true,
+						Computed: true,
+						MarkdownDescription: "whether secret is only available for" +
+							" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"images": schema.SetAttribute{
+						ElementType: types.StringType,
+						Optional:    true,
+						Computed:    true,
+						Description: "list of Docker images for which this secret is available, leave blank to allow all images",
+						PlanModifiers: []planmodifier.Set{
+							setplanmodifier.UseStateForUnknown(),
+						},
+					},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var priorStateData secretResourceModelV0
+
+				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				resp.Diagnostics.Append(resp.State.Set(ctx, secretResourceModelV1{
+					ID:     priorStateData.ID,
+					Name:   priorStateData.Name,
+					Value:  priorStateData.Value,
+					Images: priorStateData.Images,
+					Events: priorStateData.Events,
+				})...)
+			},
+		},
+	}
 }

@@ -40,7 +40,6 @@ resource "woodpecker_repository_secret" "test" {
 ### Optional
 
 - `images` (Set of String) list of Docker images for which this secret is available, leave blank to allow all images
-- `plugins_only` (Boolean) whether secret is only available for [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)
 
 ### Read-Only
 

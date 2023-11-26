@@ -3,9 +3,9 @@ package internal
 import (
 	"context"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 type userModel struct {
@@ -38,7 +38,7 @@ func (m *userModel) toWoodpeckerModel(_ context.Context) (*woodpecker.User, diag
 	}, nil
 }
 
-type secretResourceModel struct {
+type secretResourceModelV0 struct {
 	ID          types.Int64  `tfsdk:"id"`
 	Name        types.String `tfsdk:"name"`
 	Value       types.String `tfsdk:"value"`
@@ -47,7 +47,15 @@ type secretResourceModel struct {
 	Events      types.Set    `tfsdk:"events"`
 }
 
-func (m *secretResourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+type secretResourceModelV1 struct {
+	ID     types.Int64  `tfsdk:"id"`
+	Name   types.String `tfsdk:"name"`
+	Value  types.String `tfsdk:"value"`
+	Images types.Set    `tfsdk:"images"`
+	Events types.Set    `tfsdk:"events"`
+}
+
+func (m *secretResourceModelV1) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
 	var diagsRes diag.Diagnostics
 	var diags diag.Diagnostics
 
@@ -55,21 +63,19 @@ func (m *secretResourceModel) setValues(ctx context.Context, secret *woodpecker.
 	m.Name = types.StringValue(secret.Name)
 	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
 	diagsRes.Append(diags...)
-	m.PluginsOnly = types.BoolValue(secret.PluginsOnly)
 	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
 	diagsRes.Append(diags...)
 
 	return diagsRes
 }
 
-func (m *secretResourceModel) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret, diag.Diagnostics) {
+func (m *secretResourceModelV1) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	secret := &woodpecker.Secret{
-		ID:          m.ID.ValueInt64(),
-		Name:        m.Name.ValueString(),
-		Value:       m.Value.ValueString(),
-		PluginsOnly: m.PluginsOnly.ValueBool(),
+		ID:    m.ID.ValueInt64(),
+		Name:  m.Name.ValueString(),
+		Value: m.Value.ValueString(),
 	}
 	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, false)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
@@ -78,11 +84,10 @@ func (m *secretResourceModel) toWoodpeckerModel(ctx context.Context) (*woodpecke
 }
 
 type secretDataSourceModel struct {
-	ID          types.Int64  `tfsdk:"id"`
-	Name        types.String `tfsdk:"name"`
-	Images      types.Set    `tfsdk:"images"`
-	PluginsOnly types.Bool   `tfsdk:"plugins_only"`
-	Events      types.Set    `tfsdk:"events"`
+	ID     types.Int64  `tfsdk:"id"`
+	Name   types.String `tfsdk:"name"`
+	Images types.Set    `tfsdk:"images"`
+	Events types.Set    `tfsdk:"events"`
 }
 
 func (m *secretDataSourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
@@ -93,7 +98,6 @@ func (m *secretDataSourceModel) setValues(ctx context.Context, secret *woodpecke
 	m.Name = types.StringValue(secret.Name)
 	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
 	diagsRes.Append(diags...)
-	m.PluginsOnly = types.BoolValue(secret.PluginsOnly)
 	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
 	diagsRes.Append(diags...)
 
@@ -128,7 +132,7 @@ func (m *repositoryModel) setValues(_ context.Context, repo *woodpecker.Repo) di
 	m.Name = types.StringValue(repo.Name)
 	m.FullName = types.StringValue(repo.FullName)
 	m.AvatarURL = types.StringValue(repo.Avatar)
-	m.URL = types.StringValue(repo.Link)
+	m.URL = types.StringValue(repo.ForgeURL)
 	m.CloneURL = types.StringValue(repo.Clone)
 	m.DefaultBranch = types.StringValue(repo.DefaultBranch)
 	m.SCMKind = types.StringValue(repo.SCMKind)
@@ -154,7 +158,7 @@ func (m *repositoryModel) toWoodpeckerPatch(_ context.Context) (*woodpecker.Repo
 	}, nil
 }
 
-type repositorySecretResourceModel struct {
+type repositorySecretResourceModelV0 struct {
 	ID           types.Int64  `tfsdk:"id"`
 	RepositoryID types.Int64  `tfsdk:"repository_id"`
 	Name         types.String `tfsdk:"name"`
@@ -164,7 +168,16 @@ type repositorySecretResourceModel struct {
 	Events       types.Set    `tfsdk:"events"`
 }
 
-func (m *repositorySecretResourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+type repositorySecretResourceModelV1 struct {
+	ID           types.Int64  `tfsdk:"id"`
+	RepositoryID types.Int64  `tfsdk:"repository_id"`
+	Name         types.String `tfsdk:"name"`
+	Value        types.String `tfsdk:"value"`
+	Images       types.Set    `tfsdk:"images"`
+	Events       types.Set    `tfsdk:"events"`
+}
+
+func (m *repositorySecretResourceModelV1) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
 	var diagsRes diag.Diagnostics
 	var diags diag.Diagnostics
 
@@ -172,21 +185,21 @@ func (m *repositorySecretResourceModel) setValues(ctx context.Context, secret *w
 	m.Name = types.StringValue(secret.Name)
 	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
 	diagsRes.Append(diags...)
-	m.PluginsOnly = types.BoolValue(secret.PluginsOnly)
 	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
 	diagsRes.Append(diags...)
 
 	return diagsRes
 }
 
-func (m *repositorySecretResourceModel) toWoodpeckerModel(ctx context.Context) (*woodpecker.Secret, diag.Diagnostics) {
+func (m *repositorySecretResourceModelV1) toWoodpeckerModel(
+	ctx context.Context,
+) (*woodpecker.Secret, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	secret := &woodpecker.Secret{
-		ID:          m.ID.ValueInt64(),
-		Name:        m.Name.ValueString(),
-		Value:       m.Value.ValueString(),
-		PluginsOnly: m.PluginsOnly.ValueBool(),
+		ID:    m.ID.ValueInt64(),
+		Name:  m.Name.ValueString(),
+		Value: m.Value.ValueString(),
 	}
 	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, false)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
@@ -199,7 +212,6 @@ type repositorySecretDataSourceModel struct {
 	RepositoryID types.Int64  `tfsdk:"repository_id"`
 	Name         types.String `tfsdk:"name"`
 	Images       types.Set    `tfsdk:"images"`
-	PluginsOnly  types.Bool   `tfsdk:"plugins_only"`
 	Events       types.Set    `tfsdk:"events"`
 }
 
@@ -211,7 +223,6 @@ func (m *repositorySecretDataSourceModel) setValues(ctx context.Context, secret 
 	m.Name = types.StringValue(secret.Name)
 	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
 	diagsRes.Append(diags...)
-	m.PluginsOnly = types.BoolValue(secret.PluginsOnly)
 	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
 	diagsRes.Append(diags...)
 

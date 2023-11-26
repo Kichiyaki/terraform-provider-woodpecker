@@ -31,13 +31,13 @@ jobs:
       - uses: golangci/golangci-lint-action@v3
         with:
           version: v1.55
-      - name: Gitea 1.20 & Woodpecker 1.0
+      - name: Gitea 1.21 & Woodpecker 2.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
-          GITEA_IMAGE: gitea/gitea:1.20
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v1.0
-      - name: Forgejo 1.20 & Woodpecker 1.0
+          GITEA_IMAGE: gitea/gitea:1.21
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.0
+      - name: Forgejo 1.20 & Woodpecker 2.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
           GITEA_IMAGE: codeberg.org/forgejo/forgejo:1.20
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v1.0
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.0

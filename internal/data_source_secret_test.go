@@ -33,7 +33,6 @@ data "woodpecker_secret" "test_secret" {
 					resource.TestCheckResourceAttrSet("data.woodpecker_secret.test_secret", "id"),
 					resource.TestCheckResourceAttr("data.woodpecker_secret.test_secret", "name", name),
 					resource.TestCheckTypeSetElemAttr("data.woodpecker_secret.test_secret", "events.*", "push"),
-					resource.TestCheckResourceAttr("data.woodpecker_secret.test_secret", "plugins_only", "false"),
 				),
 			},
 		},

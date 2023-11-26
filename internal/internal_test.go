@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"code.gitea.io/sdk/gitea"
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/google/uuid"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
-	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 	"golang.org/x/oauth2"
 )
 
@@ -345,7 +345,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v1.0.2"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.0.0"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {
