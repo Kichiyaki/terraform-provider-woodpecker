@@ -37,7 +37,8 @@ func (r *secretResource) Metadata(_ context.Context, req resource.MetadataReques
 
 func (r *secretResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "This resource allows you to add/remove global secrets. When applied, a new secret will be created." +
+		MarkdownDescription: "This resource allows you to add/remove global secrets." +
+			" When applied, a new secret will be created." +
 			" When destroyed, that secret will be removed." +
 			" For more information see [the Woodpecker docs](https://woodpecker-ci.org/docs/usage/secrets).",
 		Attributes: map[string]schema.Attribute{
@@ -77,9 +78,10 @@ func (r *secretResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				},
 			},
 			"plugins_only": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				MarkdownDescription: "whether secret is only available for [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
+				Optional: true,
+				Computed: true,
+				MarkdownDescription: "whether secret is only available for" +
+					" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -107,7 +109,10 @@ func (r *secretResource) Configure(_ context.Context, req resource.ConfigureRequ
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -208,6 +213,10 @@ func (r *secretResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *secretResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *secretResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), req.ID)...)
 }

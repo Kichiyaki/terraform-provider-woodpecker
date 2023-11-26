@@ -21,7 +21,11 @@ func newSecretDataSource() datasource.DataSource {
 	return &secretDataSource{}
 }
 
-func (d *secretDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *secretDataSource) Metadata(
+	_ context.Context,
+	req datasource.MetadataRequest,
+	resp *datasource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_secret"
 }
 
@@ -43,8 +47,9 @@ func (d *secretDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 				Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
 			},
 			"plugins_only": schema.BoolAttribute{
-				Computed:            true,
-				MarkdownDescription: "whether secret is only available for [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
+				Computed: true,
+				MarkdownDescription: "whether secret is only available for " +
+					"[plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
 			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -55,7 +60,11 @@ func (d *secretDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 	}
 }
 
-func (d *secretDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *secretDataSource) Configure(
+	_ context.Context,
+	req datasource.ConfigureRequest,
+	resp *datasource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -65,7 +74,10 @@ func (d *secretDataSource) Configure(_ context.Context, req datasource.Configure
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}

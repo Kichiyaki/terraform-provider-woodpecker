@@ -20,13 +20,22 @@ func newRepositoryRegistryDataSource() datasource.DataSource {
 	return &repositoryRegistryDataSource{}
 }
 
-func (d *repositoryRegistryDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *repositoryRegistryDataSource) Metadata(
+	_ context.Context,
+	req datasource.MetadataRequest,
+	resp *datasource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository_registry"
 }
 
-func (d *repositoryRegistryDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *repositoryRegistryDataSource) Schema(
+	_ context.Context,
+	_ datasource.SchemaRequest,
+	resp *datasource.SchemaResponse,
+) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Use this data source to retrieve information about a container registry in a specific repository.",
+		MarkdownDescription: "Use this data source to retrieve information about a container registry" +
+			" in a specific repository.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:    true,
@@ -52,7 +61,11 @@ func (d *repositoryRegistryDataSource) Schema(_ context.Context, _ datasource.Sc
 	}
 }
 
-func (d *repositoryRegistryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *repositoryRegistryDataSource) Configure(
+	_ context.Context,
+	req datasource.ConfigureRequest,
+	resp *datasource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -62,7 +75,10 @@ func (d *repositoryRegistryDataSource) Configure(_ context.Context, req datasour
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -70,7 +86,11 @@ func (d *repositoryRegistryDataSource) Configure(_ context.Context, req datasour
 	d.client = client
 }
 
-func (d *repositoryRegistryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *repositoryRegistryDataSource) Read(
+	ctx context.Context,
+	req datasource.ReadRequest,
+	resp *datasource.ReadResponse,
+) {
 	var data repositoryRegistryDataSourceModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

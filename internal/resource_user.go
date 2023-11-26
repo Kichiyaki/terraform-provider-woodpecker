@@ -32,10 +32,10 @@ func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest,
 
 func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: `Provides a user resource.
-
-
-This resource allows you to add/remove users. When applied, a new user will be created. When destroyed, that user will be removed.`,
+		MarkdownDescription: "Provides a user resource." +
+			"\n\n\nThis resource allows you to add/remove users." +
+			" When applied, a new user will be created." +
+			" When destroyed, that user will be removed.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Computed:    true,
@@ -96,7 +96,10 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -199,6 +202,10 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	// from provider logic.
 }
 
-func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *userResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("login"), req.ID)...)
 }

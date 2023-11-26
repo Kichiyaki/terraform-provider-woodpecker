@@ -30,7 +30,7 @@ jobs:
       - run: make generate && go mod tidy && git diff --exit-code go.mod docs/ examples/
       - uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.54
+          version: v1.55
       - name: Gitea 1.20 & Woodpecker 1.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:

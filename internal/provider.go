@@ -36,7 +36,8 @@ func (p *woodpeckerProvider) Metadata(_ context.Context, _ provider.MetadataRequ
 
 func (p *woodpeckerProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "A Terraform provider used to interact with [Woodpecker CI](https://woodpecker-ci.org/) resources.",
+		MarkdownDescription: "A Terraform provider used to interact with" +
+			" [Woodpecker CI](https://woodpecker-ci.org/) resources.",
 		Attributes: map[string]schema.Attribute{
 			"server": schema.StringAttribute{
 				Optional: true,
@@ -76,7 +77,11 @@ func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Reso
 	}
 }
 
-func (p *woodpeckerProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *woodpeckerProvider) Configure(
+	ctx context.Context,
+	req provider.ConfigureRequest,
+	resp *provider.ConfigureResponse,
+) {
 	cfg := newProviderConfig(ctx, req, resp)
 	if resp.Diagnostics.HasError() {
 		return

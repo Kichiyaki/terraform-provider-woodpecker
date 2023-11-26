@@ -21,11 +21,19 @@ func newRepositorySecretDataSource() datasource.DataSource {
 	return &repositorySecretDataSource{}
 }
 
-func (d *repositorySecretDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *repositorySecretDataSource) Metadata(
+	_ context.Context,
+	req datasource.MetadataRequest,
+	resp *datasource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository_secret"
 }
 
-func (d *repositorySecretDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *repositorySecretDataSource) Schema(
+	_ context.Context,
+	_ datasource.SchemaRequest,
+	resp *datasource.SchemaResponse,
+) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Use this data source to retrieve information about a secret in a specific repository.",
 		Attributes: map[string]schema.Attribute{
@@ -47,8 +55,9 @@ func (d *repositorySecretDataSource) Schema(_ context.Context, _ datasource.Sche
 				Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
 			},
 			"plugins_only": schema.BoolAttribute{
-				Computed:            true,
-				MarkdownDescription: "whether secret is only available for [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
+				Computed: true,
+				MarkdownDescription: "whether secret is only available for " +
+					"[plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
 			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,
@@ -59,7 +68,11 @@ func (d *repositorySecretDataSource) Schema(_ context.Context, _ datasource.Sche
 	}
 }
 
-func (d *repositorySecretDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *repositorySecretDataSource) Configure(
+	_ context.Context,
+	req datasource.ConfigureRequest,
+	resp *datasource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -69,7 +82,10 @@ func (d *repositorySecretDataSource) Configure(_ context.Context, req datasource
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -77,7 +93,11 @@ func (d *repositorySecretDataSource) Configure(_ context.Context, req datasource
 	d.client = client
 }
 
-func (d *repositorySecretDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *repositorySecretDataSource) Read(
+	ctx context.Context,
+	req datasource.ReadRequest,
+	resp *datasource.ReadResponse,
+) {
 	var data repositorySecretDataSourceModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)

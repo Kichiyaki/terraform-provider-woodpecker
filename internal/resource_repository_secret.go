@@ -33,13 +33,18 @@ func newRepositorySecretResource() resource.Resource {
 	return &repositorySecretResource{}
 }
 
-func (r *repositorySecretResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *repositorySecretResource) Metadata(
+	_ context.Context,
+	req resource.MetadataRequest,
+	resp *resource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_repository_secret"
 }
 
 func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "This resource allows you to add/remove secrets that are only available to specific repositories." +
+		MarkdownDescription: "This resource allows you to add/remove secrets that" +
+			" are only available to specific repositories." +
 			" When applied, a new secret will be created." +
 			" When destroyed, that secret will be removed." +
 			" For more information see [the Woodpecker docs](https://woodpecker-ci.org/docs/usage/secrets).",
@@ -87,9 +92,10 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 				},
 			},
 			"plugins_only": schema.BoolAttribute{
-				Optional:            true,
-				Computed:            true,
-				MarkdownDescription: "whether secret is only available for [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
+				Optional: true,
+				Computed: true,
+				MarkdownDescription: "whether secret is only available for" +
+					" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -107,7 +113,11 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 	}
 }
 
-func (r *repositorySecretResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *repositorySecretResource) Configure(
+	_ context.Context,
+	req resource.ConfigureRequest,
+	resp *resource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -117,7 +127,10 @@ func (r *repositorySecretResource) Configure(_ context.Context, req resource.Con
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}
@@ -125,7 +138,11 @@ func (r *repositorySecretResource) Configure(_ context.Context, req resource.Con
 	r.client = client
 }
 
-func (r *repositorySecretResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *repositorySecretResource) Create(
+	ctx context.Context,
+	req resource.CreateRequest,
+	resp *resource.CreateResponse,
+) {
 	var data repositorySecretResourceModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -174,7 +191,11 @@ func (r *repositorySecretResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *repositorySecretResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *repositorySecretResource) Update(
+	ctx context.Context,
+	req resource.UpdateRequest,
+	resp *resource.UpdateResponse,
+) {
 	var data repositorySecretResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -202,7 +223,11 @@ func (r *repositorySecretResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *repositorySecretResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *repositorySecretResource) Delete(
+	ctx context.Context,
+	req resource.DeleteRequest,
+	resp *resource.DeleteResponse,
+) {
 	var data repositorySecretResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -218,7 +243,11 @@ func (r *repositorySecretResource) Delete(ctx context.Context, req resource.Dele
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *repositorySecretResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *repositorySecretResource) ImportState(
+	ctx context.Context,
+	req resource.ImportStateRequest,
+	resp *resource.ImportStateResponse,
+) {
 	idParts := strings.Split(req.ID, importStateIDSeparator)
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {

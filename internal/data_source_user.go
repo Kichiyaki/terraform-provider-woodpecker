@@ -20,7 +20,11 @@ func newUserDataSource() datasource.DataSource {
 	return &userDataSource{}
 }
 
-func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *userDataSource) Metadata(
+	_ context.Context,
+	req datasource.MetadataRequest,
+	resp *datasource.MetadataResponse,
+) {
 	resp.TypeName = req.ProviderTypeName + "_user"
 }
 
@@ -33,8 +37,9 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Description: "the user's id",
 			},
 			"login": schema.StringAttribute{
-				Required:    true,
-				Description: "The user's login. Use an empty string \"\" to retrieve information about the currently authenticated user.",
+				Required: true,
+				Description: "The user's login. " +
+					"Use an empty string \"\" to retrieve information about the currently authenticated user.",
 			},
 			"email": schema.StringAttribute{
 				Computed:    true,
@@ -56,7 +61,11 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 	}
 }
 
-func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *userDataSource) Configure(
+	_ context.Context,
+	req datasource.ConfigureRequest,
+	resp *datasource.ConfigureResponse,
+) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -66,7 +75,10 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf(
+				"Expected woodpecker.Client, got: %T. Please report this issue to the provider developers.",
+				req.ProviderData,
+			),
 		)
 		return
 	}

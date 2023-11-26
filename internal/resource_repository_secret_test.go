@@ -46,7 +46,11 @@ resource "woodpecker_repository_secret" "test_secret" {
 `, repo.ID, name),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(repo.ID, 10)),
+						resource.TestCheckResourceAttr(
+							"woodpecker_repository_secret.test_secret",
+							"repository_id",
+							strconv.FormatInt(repo.ID, 10),
+						),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
@@ -66,7 +70,11 @@ resource "woodpecker_repository_secret" "test_secret" {
 `, repo.ID, name),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(repo.ID, 10)),
+						resource.TestCheckResourceAttr(
+							"woodpecker_repository_secret.test_secret",
+							"repository_id",
+							strconv.FormatInt(repo.ID, 10),
+						),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
@@ -86,7 +94,11 @@ resource "woodpecker_repository_secret" "test_secret" {
 //`, repo.ID, name),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(repo.ID, 10)),
+						resource.TestCheckResourceAttr(
+							"woodpecker_repository_secret.test_secret",
+							"repository_id",
+							strconv.FormatInt(repo.ID, 10),
+						),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
@@ -119,7 +131,11 @@ resource "woodpecker_repository_secret" "test_secret" {
 					},
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(repo.ID, 10)),
+						resource.TestCheckResourceAttr(
+							"woodpecker_repository_secret.test_secret",
+							"repository_id",
+							strconv.FormatInt(repo.ID, 10),
+						),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", newName),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123New"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
@@ -142,7 +158,11 @@ resource "woodpecker_repository_secret" "test_secret" {
 					},
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository_secret.test_secret", "id"),
-						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "repository_id", strconv.FormatInt(newRepo.ID, 10)),
+						resource.TestCheckResourceAttr(
+							"woodpecker_repository_secret.test_secret",
+							"repository_id",
+							strconv.FormatInt(newRepo.ID, 10),
+						),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "name", newName),
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123New"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),

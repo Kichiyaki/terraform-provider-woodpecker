@@ -48,7 +48,13 @@ func TestMain(m *testing.M) {
 
 	giteaClient = newGiteaClient(resourceGitea.httpURL, resourceGitea.user)
 
-	resourceWoodpecker := runWoodpecker(pool, network, resourceGitea.httpURL, resourceGitea.privateHTTPURL, resourceGitea.user)
+	resourceWoodpecker := runWoodpecker(
+		pool,
+		network,
+		resourceGitea.httpURL,
+		resourceGitea.privateHTTPURL,
+		resourceGitea.user,
+	)
 	deferFuncs = append(deferFuncs, func() {
 		_ = resourceWoodpecker.Close()
 	})
@@ -68,7 +74,6 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(code)
-
 }
 
 func newDockertestPool() *dockertest.Pool {
@@ -103,7 +108,8 @@ type giteaResource struct {
 
 func runGitea(pool *dockertest.Pool, network *dockertest.Network) giteaResource {
 	repo, tag := getGiteaRepoTag()
-	gitea, err := pool.RunWithOptions(&dockertest.RunOptions{
+
+	giteaRsc, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: repo,
 		Tag:        tag,
 		Networks:   []*dockertest.Network{network},
@@ -120,13 +126,13 @@ func runGitea(pool *dockertest.Pool, network *dockertest.Network) giteaResource 
 		log.Fatalf("couldn't run gitea: %s", err)
 	}
 
-	if err = gitea.Expire(giteaContainerExpInSec); err != nil {
+	if err = giteaRsc.Expire(giteaContainerExpInSec); err != nil {
 		log.Fatal(err)
 	}
 
 	httpURL := &urlpkg.URL{
 		Scheme: "http",
-		Host:   getHostPort(gitea, "3000/tcp"),
+		Host:   getHostPort(giteaRsc, "3000/tcp"),
 	}
 
 	if err = pool.Retry(func() error {
@@ -158,13 +164,13 @@ func runGitea(pool *dockertest.Pool, network *dockertest.Network) giteaResource 
 	}
 
 	return giteaResource{
-		docker:  gitea,
+		docker:  giteaRsc,
 		httpURL: httpURL,
 		privateHTTPURL: &urlpkg.URL{
 			Scheme: httpURL.Scheme,
-			Host:   gitea.GetIPInNetwork(network) + ":3000",
+			Host:   giteaRsc.GetIPInNetwork(network) + ":3000",
 		},
-		user: createGiteaUser(pool, gitea),
+		user: createGiteaUser(pool, giteaRsc),
 	}
 }
 
@@ -174,7 +180,8 @@ func (r giteaResource) Close() error {
 
 const defaultGiteaImage = "gitea/gitea:1.20"
 
-func getGiteaRepoTag() (string, string) {
+//nolint:nonamedreturns
+func getGiteaRepoTag() (repository string, tag string) {
 	val := os.Getenv("GITEA_IMAGE")
 	if val == "" {
 		val = defaultGiteaImage
@@ -182,7 +189,7 @@ func getGiteaRepoTag() (string, string) {
 	return docker.ParseRepositoryTag(val)
 }
 
-func createGiteaUser(pool *dockertest.Pool, gitea *dockertest.Resource) *urlpkg.Userinfo {
+func createGiteaUser(pool *dockertest.Pool, giteaRsc *dockertest.Resource) *urlpkg.Userinfo {
 	username := strings.ReplaceAll(uuid.NewString(), "-", "")
 	password := uuid.NewString()
 
@@ -190,7 +197,7 @@ func createGiteaUser(pool *dockertest.Pool, gitea *dockertest.Resource) *urlpkg.
 	stdErrBuf := bytes.NewBuffer(nil)
 
 	exec, err := pool.Client.CreateExec(docker.CreateExecOptions{
-		Container: gitea.Container.ID,
+		Container: giteaRsc.Container.ID,
 		User:      "git",
 		Cmd: []string{
 			"gitea",
@@ -259,7 +266,7 @@ func runWoodpecker(
 	}
 
 	repo, tag := getWoodpeckerRepoTag()
-	woodpecker, err := pool.RunWithOptions(&dockertest.RunOptions{
+	woodpeckerRsc, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: repo,
 		Tag:        tag,
 		Networks:   []*dockertest.Network{network},
@@ -295,7 +302,7 @@ func runWoodpecker(
 		log.Fatalf("couldn't run woodpecker: %s", err)
 	}
 
-	if err = woodpecker.Expire(woodpeckerContainerExpInSec); err != nil {
+	if err = woodpeckerRsc.Expire(woodpeckerContainerExpInSec); err != nil {
 		log.Fatal(err)
 	}
 
@@ -328,7 +335,7 @@ func runWoodpecker(
 	}
 
 	return woodpeckerResource{
-		docker:  woodpecker,
+		docker:  woodpeckerRsc,
 		httpURL: httpURL,
 		token:   newWoodpeckerTokenProvider(oauthApp, giteaUser, giteaPublicURL, httpURL).token(),
 	}
@@ -340,7 +347,8 @@ func (r woodpeckerResource) Close() error {
 
 const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v1.0.2"
 
-func getWoodpeckerRepoTag() (string, string) {
+//nolint:nonamedreturns
+func getWoodpeckerRepoTag() (repo string, tag string) {
 	val := os.Getenv("WOODPECKER_IMAGE")
 	if val == "" {
 		val = defaultWoodpeckerImage
@@ -453,7 +461,12 @@ func (p woodpeckerTokenProvider) get(ctx context.Context, url string) *http.Resp
 	return p.do(p.newRequestWithContext(ctx, http.MethodGet, url, nil))
 }
 
-func (p woodpeckerTokenProvider) newRequestWithContext(ctx context.Context, method string, url string, body io.Reader) *http.Request {
+func (p woodpeckerTokenProvider) newRequestWithContext(
+	ctx context.Context,
+	method string,
+	url string,
+	body io.Reader,
+) *http.Request {
 	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		log.Fatalf("couldn't construct request for url %s: %s", url, err)
