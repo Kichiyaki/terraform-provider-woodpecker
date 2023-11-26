@@ -6,7 +6,7 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/google/uuid"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/woodpecker-go/woodpecker"
 )
 
 func createRepo(tb testing.TB) *gitea.Repository {
