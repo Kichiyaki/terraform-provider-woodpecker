@@ -37,10 +37,6 @@ resource "woodpecker_repository_secret" "test" {
 - `repository_id` (Number) the ID of the repository
 - `username` (String) username used for authentication
 
-### Optional
-
-- `email` (String) email used for authentication
-
 ### Read-Only
 
 - `id` (Number) the id of the registry

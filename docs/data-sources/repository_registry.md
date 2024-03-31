@@ -33,6 +33,5 @@ data "woodpecker_repository_secret" "test_secret" {
 
 ### Read-Only
 
-- `email` (String) email used for authentication
 - `id` (Number) the id of the registry
 - `username` (String) username used for authentication

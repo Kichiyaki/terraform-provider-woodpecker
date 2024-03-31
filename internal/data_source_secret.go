@@ -44,7 +44,8 @@ func (d *secretDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			"events": schema.SetAttribute{
 				ElementType: types.StringType,
 				Computed:    true,
-				Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
+				Description: "events for which the secret is available " +
+					"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
 			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,

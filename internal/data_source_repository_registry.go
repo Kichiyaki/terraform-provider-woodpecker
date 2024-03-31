@@ -53,10 +53,6 @@ func (d *repositoryRegistryDataSource) Schema(
 				Computed:    true,
 				Description: "username used for authentication",
 			},
-			"email": schema.StringAttribute{
-				Computed:    true,
-				Description: "email used for authentication",
-			},
 		},
 	}
 }

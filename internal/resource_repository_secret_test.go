@@ -62,7 +62,7 @@ resource "woodpecker_repository_secret" "test_secret" {
 	repository_id = %d
 	name = "%s"
 	value = "test123123"
-	events = ["push", "deployment"]
+	events = ["push", "deployment", "release", "pull_request_closed"]
 	images = ["testimage"]
 }
 `, repo.ID, name),
@@ -77,6 +77,8 @@ resource "woodpecker_repository_secret" "test_secret" {
 						resource.TestCheckResourceAttr("woodpecker_repository_secret.test_secret", "value", "test123123"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "push"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "deployment"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "release"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "events.*", "pull_request_closed"),
 						resource.TestCheckTypeSetElemAttr("woodpecker_repository_secret.test_secret", "images.*", "testimage"),
 					),
 				},

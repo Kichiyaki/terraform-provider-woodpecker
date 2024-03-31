@@ -76,14 +76,6 @@ func (r *repositoryRegistryResource) Schema(
 				Description: "password used for authentication",
 				Sensitive:   true,
 			},
-			"email": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "email used for authentication",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 		},
 	}
 }

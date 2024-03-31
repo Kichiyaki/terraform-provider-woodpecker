@@ -33,6 +33,6 @@ data "woodpecker_repository_secret" "test_secret" {
 
 ### Read-Only
 
-- `events` (Set of String) events for which the secret is available (push, tag, pull_request, deployment, cron, manual)
+- `events` (Set of String) events for which the secret is available (push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)
 - `id` (Number) the secret's id
 - `images` (Set of String) list of Docker images for which this secret is available

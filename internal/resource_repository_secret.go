@@ -82,10 +82,20 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 			"events": schema.SetAttribute{
 				ElementType: types.StringType,
 				Required:    true,
-				Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
+				Description: "events for which the secret is available " +
+					"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(
-						stringvalidator.OneOfCaseInsensitive("push", "tag", "pull_request", "deployment", "cron", "manual"),
+						stringvalidator.OneOfCaseInsensitive(
+							"push",
+							"tag",
+							"pull_request",
+							"pull_request_closed",
+							"deployment",
+							"cron",
+							"manual",
+							"release",
+						),
 					),
 				},
 				PlanModifiers: []planmodifier.Set{
@@ -300,10 +310,20 @@ func (r *repositorySecretResource) UpgradeState(_ context.Context) map[int64]res
 					"events": schema.SetAttribute{
 						ElementType: types.StringType,
 						Required:    true,
-						Description: "events for which the secret is available (push, tag, pull_request, deployment, cron, manual)",
+						Description: "events for which the secret is available " +
+							"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
 						Validators: []validator.Set{
 							setvalidator.ValueStringsAre(
-								stringvalidator.OneOfCaseInsensitive("push", "tag", "pull_request", "deployment", "cron", "manual"),
+								stringvalidator.OneOfCaseInsensitive(
+									"push",
+									"tag",
+									"pull_request",
+									"pull_request_closed",
+									"deployment",
+									"cron",
+									"manual",
+									"release",
+								),
 							),
 						},
 						PlanModifiers: []planmodifier.Set{

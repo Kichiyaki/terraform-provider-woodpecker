@@ -60,7 +60,6 @@ resource "woodpecker_repository_registry" "test_registry" {
 	address = "%s"
 	username = "test2"
 	password = "test2"
-	email = "test@localhost"
 }
 `, repo.ID, address),
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -73,7 +72,6 @@ resource "woodpecker_repository_registry" "test_registry" {
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", address),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test2"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test2"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "email", "test@localhost"),
 				),
 			},
 			{ // update registry
@@ -95,7 +93,6 @@ resource "woodpecker_repository_registry" "test_registry" {
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "address", address),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "username", "test"),
 					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "password", "test"),
-					resource.TestCheckResourceAttr("woodpecker_repository_registry.test_registry", "email", "test@localhost"),
 				),
 			},
 			{ // import

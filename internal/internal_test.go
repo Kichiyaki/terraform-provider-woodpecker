@@ -345,7 +345,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.0.0"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.4.1"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {
