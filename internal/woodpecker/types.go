@@ -134,8 +134,10 @@ type (
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
-		Email    string `json:"email"`
-		Token    string `json:"token"`
+		// Deprecated
+		Email string `json:"email"` // TODO remove in 3.x
+		// Deprecated
+		Token string `json:"token"` // TODO remove in 3.x
 	}
 
 	// Secret represents a secret variable, such as a password or token.

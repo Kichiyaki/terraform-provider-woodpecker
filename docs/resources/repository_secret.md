@@ -32,7 +32,7 @@ resource "woodpecker_repository_secret" "test" {
 
 ### Required
 
-- `events` (Set of String) events for which the secret is available (push, tag, pull_request, deployment, cron, manual)
+- `events` (Set of String) events for which the secret is available (push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)
 - `name` (String) the name of the secret
 - `repository_id` (Number) the ID of the repository
 - `value` (String, Sensitive) the value of the secret

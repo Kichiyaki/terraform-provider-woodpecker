@@ -35,9 +35,9 @@ jobs:
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
           GITEA_IMAGE: gitea/gitea:1.21
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.0
-      - name: Forgejo 1.20 & Woodpecker 2.0
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.4.1
+      - name: Forgejo 1.21 & Woodpecker 2.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
-          GITEA_IMAGE: codeberg.org/forgejo/forgejo:1.20
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.0
+          GITEA_IMAGE: codeberg.org/forgejo/forgejo:1.21
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.4.1

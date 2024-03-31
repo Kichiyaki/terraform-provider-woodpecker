@@ -268,14 +268,12 @@ type repositoryRegistryResourceModel struct {
 	Address      types.String `tfsdk:"address"`
 	Username     types.String `tfsdk:"username"`
 	Password     types.String `tfsdk:"password"`
-	Email        types.String `tfsdk:"email"`
 }
 
 func (m *repositoryRegistryResourceModel) setValues(_ context.Context, registry *woodpecker.Registry) diag.Diagnostics {
 	m.ID = types.Int64Value(registry.ID)
 	m.Address = types.StringValue(registry.Address)
 	m.Username = types.StringValue(registry.Username)
-	m.Email = types.StringValue(registry.Email)
 	return nil
 }
 
@@ -287,7 +285,6 @@ func (m *repositoryRegistryResourceModel) toWoodpeckerModel(
 		Address:  m.Address.ValueString(),
 		Username: m.Username.ValueString(),
 		Password: m.Password.ValueString(),
-		Email:    m.Email.ValueString(),
 	}, nil
 }
 
@@ -296,7 +293,6 @@ type repositoryRegistryDataSourceModel struct {
 	RepositoryID types.Int64  `tfsdk:"repository_id"`
 	Address      types.String `tfsdk:"address"`
 	Username     types.String `tfsdk:"username"`
-	Email        types.String `tfsdk:"email"`
 }
 
 func (m *repositoryRegistryDataSourceModel) setValues(
@@ -306,6 +302,5 @@ func (m *repositoryRegistryDataSourceModel) setValues(
 	m.ID = types.Int64Value(registry.ID)
 	m.Address = types.StringValue(registry.Address)
 	m.Username = types.StringValue(registry.Username)
-	m.Email = types.StringValue(registry.Email)
 	return nil
 }
