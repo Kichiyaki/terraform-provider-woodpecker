@@ -178,7 +178,7 @@ func (r giteaResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultGiteaImage = "gitea/gitea:1.20"
+const defaultGiteaImage = "gitea/gitea:1.21"
 
 //nolint:nonamedreturns
 func getGiteaRepoTag() (repository string, tag string) {
@@ -345,7 +345,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.4.1"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.6.0"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {
@@ -480,7 +480,7 @@ func (p woodpeckerTokenProvider) do(req *http.Request) *http.Response {
 	if err != nil {
 		log.Fatalf("request to %s failed: %s", req.URL.String(), err)
 	}
-	if resp.StatusCode/100 != 2 { // accept only 2XX requests
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices { // accept only 2XX requests
 		b, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
 		log.Fatalf("request to %s failed (status code = %d): %s", req.URL.String(), resp.StatusCode, b)

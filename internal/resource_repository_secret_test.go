@@ -193,7 +193,7 @@ resource "woodpecker_repository_secret" "test_secret" {
 }
 
 func checkRepositorySecretResourceDestroy(m map[int64][]string) func(state *terraform.State) error {
-	return func(state *terraform.State) error {
+	return func(_ *terraform.State) error {
 		for repoID, names := range m {
 			secrets, err := woodpeckerClient.SecretList(repoID)
 			if err != nil {

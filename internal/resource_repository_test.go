@@ -229,7 +229,7 @@ resource "woodpecker_repository" "test_repo" {
 }
 
 func checkRepositoryResourceDestroy(names ...string) func(state *terraform.State) error {
-	return func(state *terraform.State) error {
+	return func(_ *terraform.State) error {
 		repos, err := woodpeckerClient.RepoListOpts(true)
 		if err != nil {
 			return fmt.Errorf("couldn't list repos: %w", err)

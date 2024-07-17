@@ -104,7 +104,7 @@ resource "woodpecker_user" "test_user" {
 }
 
 func checkUserResourceDestroy(logins ...string) func(state *terraform.State) error {
-	return func(state *terraform.State) error {
+	return func(_ *terraform.State) error {
 		users, err := woodpeckerClient.UserList()
 		if err != nil {
 			return fmt.Errorf("couldn't list users: %w", err)
