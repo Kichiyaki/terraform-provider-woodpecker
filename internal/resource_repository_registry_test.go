@@ -162,7 +162,7 @@ resource "woodpecker_repository_registry" "test_registry" {
 }
 
 func checkRepositoryRegistryResourceDestroy(m map[int64][]string) func(state *terraform.State) error {
-	return func(state *terraform.State) error {
+	return func(_ *terraform.State) error {
 		for repoID, addresses := range m {
 			registries, err := woodpeckerClient.RegistryList(repoID)
 			if err != nil {

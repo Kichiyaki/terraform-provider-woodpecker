@@ -30,14 +30,14 @@ jobs:
       - run: make generate && go mod tidy && git diff --exit-code go.mod docs/ examples/
       - uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.55
+          version: v1.59
       - name: Gitea 1.21 & Woodpecker 2.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
           GITEA_IMAGE: gitea/gitea:1.21
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.4.1
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.6.0
       - name: Forgejo 1.21 & Woodpecker 2.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
           GITEA_IMAGE: codeberg.org/forgejo/forgejo:1.21
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.4.1
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.6.0

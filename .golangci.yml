@@ -1,8 +1,6 @@
 run:
   tests: true
   timeout: 5m
-  skip-dirs:
-    - internal/woodpecker
 
 linters:
   disable-all: true
@@ -462,6 +460,8 @@ linters-settings:
 
 
 issues:
+  exclude-dirs:
+    - internal/woodpecker
   exclude-rules:
     # Exclude some linters from running on tests files.
     - path: _test\.go

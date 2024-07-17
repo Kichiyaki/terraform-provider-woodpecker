@@ -137,7 +137,7 @@ resource "woodpecker_repository_cron" "test_cron" {
 }
 
 func checkRepositoryCronResourceDestroy(m map[int64][]string) func(state *terraform.State) error {
-	return func(state *terraform.State) error {
+	return func(_ *terraform.State) error {
 		for repoID, names := range m {
 			crons, err := woodpeckerClient.CronList(repoID)
 			if err != nil {

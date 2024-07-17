@@ -133,7 +133,7 @@ resource "woodpecker_secret" "test_secret" {
 }
 
 func checkSecretResourceDestroy(names ...string) func(state *terraform.State) error {
-	return func(state *terraform.State) error {
+	return func(_ *terraform.State) error {
 		secrets, err := woodpeckerClient.GlobalSecretList()
 		if err != nil {
 			return fmt.Errorf("couldn't list secrets: %w", err)
