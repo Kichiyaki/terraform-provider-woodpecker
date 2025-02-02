@@ -32,10 +32,9 @@ func TestRepositoryResource(t *testing.T) {
 					Config: fmt.Sprintf(`
 resource "woodpecker_repository" "test_repo" {
 	full_name = "%s"
-	is_trusted = true
-	visibility = "public"
+	visibility = "%s"
 }
-`, repo1.FullName),
+`, repo1.FullName, woodpecker.VisibilityModePublic),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository.test_repo", "id"),
 						resource.TestCheckResourceAttr(
@@ -51,13 +50,16 @@ resource "woodpecker_repository" "test_repo" {
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "default_branch", repo1.DefaultBranch),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "scm", "git"),
 						resource.TestCheckResourceAttrSet("woodpecker_repository.test_repo", "timeout"),
-						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "visibility", "public"),
+						resource.TestCheckResourceAttr(
+							"woodpecker_repository.test_repo",
+							"visibility",
+							woodpecker.VisibilityModePublic.String(),
+						),
 						resource.TestCheckResourceAttr(
 							"woodpecker_repository.test_repo",
 							"is_private",
 							strconv.FormatBool(repo1.Private),
 						),
-						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_trusted", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "allow_pull_requests", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "config_file", ""),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "netrc_only_trusted", "true"),
@@ -225,7 +227,7 @@ resource "woodpecker_repository" "test_repo" {
 
 func checkRepositoryResourceDestroy(names ...string) func(state *terraform.State) error {
 	return func(_ *terraform.State) error {
-		repos, err := woodpeckerClient.RepoListOpts(true)
+		repos, err := woodpeckerClient.RepoList(woodpecker.RepoListOptions{All: true})
 		if err != nil {
 			return fmt.Errorf("couldn't list repos: %w", err)
 		}

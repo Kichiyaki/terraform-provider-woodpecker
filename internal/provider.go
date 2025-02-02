@@ -164,7 +164,7 @@ func newClient(
 		return nil
 	}
 
-	c, err := semver.NewConstraint(">= 2.0.0")
+	c, err := semver.NewConstraint(">= 3.0.0")
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Couldn't parse woodpecker version constraint",

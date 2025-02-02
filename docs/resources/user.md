@@ -39,8 +39,8 @@ resource "woodpecker_user" "test" {
 
 ### Read-Only
 
+- `forge_id` (Number) the forge's id
 - `id` (Number) the user's id
-- `is_active` (Boolean) whether user is active in the system
 
 ## Import
 

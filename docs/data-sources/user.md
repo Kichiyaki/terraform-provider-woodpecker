@@ -35,6 +35,6 @@ data "woodpecker_user" "user" {
 
 - `avatar_url` (String) the user's avatar URL
 - `email` (String) the user's email
+- `forge_id` (Number) the forge's id
 - `id` (Number) the user's id
-- `is_active` (Boolean) whether user is active in the system
 - `is_admin` (Boolean) whether user is an admin

@@ -36,6 +36,10 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Computed:    true,
 				Description: "the user's id",
 			},
+			"forge_id": schema.Int64Attribute{
+				Computed:    true,
+				Description: "the forge's id",
+			},
 			"login": schema.StringAttribute{
 				Required: true,
 				Description: "The user's login. " +
@@ -48,10 +52,6 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			"avatar_url": schema.StringAttribute{
 				Computed:    true,
 				Description: "the user's avatar URL",
-			},
-			"is_active": schema.BoolAttribute{
-				Computed:    true,
-				Description: "whether user is active in the system",
 			},
 			"is_admin": schema.BoolAttribute{
 				Computed:    true,

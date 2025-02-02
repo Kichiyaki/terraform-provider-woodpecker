@@ -86,7 +86,7 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 					"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(
-						stringvalidator.OneOfCaseInsensitive(
+						stringvalidator.OneOf(
 							"push",
 							"tag",
 							"pull_request",
@@ -314,7 +314,7 @@ func (r *repositorySecretResource) UpgradeState(_ context.Context) map[int64]res
 							"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
 						Validators: []validator.Set{
 							setvalidator.ValueStringsAre(
-								stringvalidator.OneOfCaseInsensitive(
+								stringvalidator.OneOf(
 									"push",
 									"tag",
 									"pull_request",

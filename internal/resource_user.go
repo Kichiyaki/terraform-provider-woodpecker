@@ -44,6 +44,13 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
+			"forge_id": schema.Int64Attribute{
+				Computed:    true,
+				Description: "the forge's id",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
 			"login": schema.StringAttribute{
 				Required:    true,
 				Description: "the name of the user",
@@ -65,13 +72,6 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Description: "the user's avatar URL",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"is_active": schema.BoolAttribute{
-				Computed:    true,
-				Description: "whether user is active in the system",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"is_admin": schema.BoolAttribute{
