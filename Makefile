@@ -22,7 +22,7 @@ install-tfplugindocs:
 .PHONY: install-golangci-lint
 install-golangci-lint:
 	@echo "Installing github.com/golangci/golangci-lint..."
-	@(test -f $(GOLANGCI_LINT_PATH) && echo "github.com/golangci/golangci-lint is already installed. Skipping...") || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v1.59.1
+	@(test -f $(GOLANGCI_LINT_PATH) && echo "github.com/golangci/golangci-lint is already installed. Skipping...") || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v1.63.4
 
 .PHONY: install-tools
 install-tools: install-golangci-lint install-tfplugindocs

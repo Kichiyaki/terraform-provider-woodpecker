@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
+	"math/rand/v2"
 	"net/http"
 	"net/http/cookiejar"
 	urlpkg "net/url"
@@ -20,6 +20,7 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/google/uuid"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -178,7 +179,7 @@ func (r giteaResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultGiteaImage = "gitea/gitea:1.21"
+const defaultGiteaImage = "gitea/gitea:1.23"
 
 //nolint:nonamedreturns
 func getGiteaRepoTag() (repository string, tag string) {
@@ -253,7 +254,7 @@ func runWoodpecker(
 	httpURL := &urlpkg.URL{
 		Scheme: giteaPublicURL.Scheme,
 		//nolint:gosec
-		Host: giteaPublicURL.Hostname() + ":" + strconv.Itoa(rand.New(rand.NewSource(time.Now().Unix())).Intn(5000)+35000),
+		Host: giteaPublicURL.Hostname() + ":" + strconv.Itoa(rand.IntN(5000)+35000),
 	}
 
 	oauthApp, _, err := giteaClient.CreateOauth2(gitea.CreateOauth2Option{
@@ -337,7 +338,13 @@ func runWoodpecker(
 	return woodpeckerResource{
 		docker:  woodpeckerRsc,
 		httpURL: httpURL,
-		token:   newWoodpeckerTokenProvider(oauthApp, giteaUser, giteaPublicURL, httpURL).token(),
+		token: newWoodpeckerTokenProvider(
+			oauthApp,
+			giteaUser,
+			giteaPublicURL,
+			giteaPrivateURL,
+			httpURL,
+		).token(),
 	}
 }
 
@@ -345,7 +352,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.6.0"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.8.3"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {
@@ -357,17 +364,17 @@ func getWoodpeckerRepoTag() (repo string, tag string) {
 }
 
 type woodpeckerTokenProvider struct {
-	client        *http.Client
-	oauthApp      *gitea.Oauth2
-	giteaUser     *urlpkg.Userinfo
-	giteaURL      *urlpkg.URL
-	woodpeckerURL *urlpkg.URL
+	client          *http.Client
+	oauthApp        *gitea.Oauth2
+	giteaUser       *urlpkg.Userinfo
+	giteaPrivateURL *urlpkg.URL
+	woodpeckerURL   *urlpkg.URL
 }
 
 func newWoodpeckerTokenProvider(
 	oauthApp *gitea.Oauth2,
 	giteaUser *urlpkg.Userinfo,
-	giteaURL *urlpkg.URL,
+	giteaPublicURL, giteaPrivateURL *urlpkg.URL,
 	woodpeckerURL *urlpkg.URL,
 ) woodpeckerTokenProvider {
 	cookieJar, _ := cookiejar.New(nil)
@@ -375,11 +382,17 @@ func newWoodpeckerTokenProvider(
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 			Jar:     cookieJar,
+			CheckRedirect: func(req *http.Request, _ []*http.Request) error {
+				if req.URL.Host == giteaPrivateURL.Host {
+					req.URL.Host = giteaPublicURL.Host
+				}
+				return nil
+			},
 		},
-		oauthApp:      oauthApp,
-		giteaUser:     giteaUser,
-		giteaURL:      giteaURL,
-		woodpeckerURL: woodpeckerURL,
+		oauthApp:        oauthApp,
+		giteaUser:       giteaUser,
+		giteaPrivateURL: giteaPublicURL,
+		woodpeckerURL:   woodpeckerURL,
 	}
 }
 
@@ -387,44 +400,43 @@ func (p woodpeckerTokenProvider) token() string {
 	ctx := context.Background()
 
 	// we need to make this request to get the csrf token
-	respGetLoginPage := p.get(ctx, p.giteaURL.String()+"/user/login")
+	respGetLoginPage := p.get(ctx, p.giteaPrivateURL.String()+"/user/login")
 	_, _ = io.Copy(io.Discard, respGetLoginPage.Body)
 	_ = respGetLoginPage.Body.Close()
 
 	// log in to Gitea
 	password, _ := p.giteaUser.Password()
-	respLogin := p.postForm(ctx, p.giteaURL.String()+"/user/login", urlpkg.Values{
-		"_csrf":     []string{p.getCSRFTokenFromCookies(p.client.Jar.Cookies(p.giteaURL))},
+	respLogin := p.postForm(ctx, p.giteaPrivateURL.String()+"/user/login", urlpkg.Values{
+		"_csrf":     []string{p.getCSRFTokenFromCookies(p.client.Jar.Cookies(p.giteaPrivateURL))},
 		"user_name": []string{p.giteaUser.Username()},
 		"password":  []string{password},
 	})
 	_, _ = io.Copy(io.Discard, respLogin.Body)
 	_ = respLogin.Body.Close()
 
-	// we need to make this request to get the csrf token
+	// we need to make this request to get the csrf token & state token
 	respAuthorize := p.get(ctx, (&urlpkg.URL{
-		Scheme: p.giteaURL.Scheme,
-		Host:   p.giteaURL.Host,
-		Path:   "/login/oauth/authorize",
+		Scheme: p.woodpeckerURL.Scheme,
+		Host:   p.woodpeckerURL.Host,
+		Path:   "/authorize",
 		RawQuery: urlpkg.Values{
-			"client_id":     []string{p.oauthApp.ClientID},
-			"redirect_uri":  []string{p.oauthApp.RedirectURIs[0]},
-			"response_type": []string{"code"},
-			"state":         []string{p.oauthApp.Name},
+			"forgeId": []string{"1"},
 		}.Encode(),
 	}).String())
-	_, _ = io.Copy(io.Discard, respAuthorize.Body)
+	giteaCSRFToken, stateToken := p.extractCSRFAndStateToken(respAuthorize.Body)
 	_ = respAuthorize.Body.Close()
 
 	// log in to Woodpecker
-	respGrant := p.postForm(ctx, p.giteaURL.String()+"/login/oauth/grant", urlpkg.Values{
-		"_csrf":         []string{p.getCSRFTokenFromCookies(p.client.Jar.Cookies(p.giteaURL))},
+
+	respGrant := p.postForm(ctx, p.giteaPrivateURL.String()+"/login/oauth/grant", urlpkg.Values{
+		"_csrf":         []string{giteaCSRFToken},
 		"client_id":     []string{p.oauthApp.ClientID},
 		"redirect_uri":  []string{p.oauthApp.RedirectURIs[0]},
-		"state":         []string{p.oauthApp.Name},
+		"state":         []string{stateToken},
 		"response_type": []string{"code"},
 		"scope":         []string{""},
 		"nonce":         []string{""},
+		"granted":       []string{"true"},
 	})
 	_, _ = io.Copy(io.Discard, respGrant.Body)
 	_ = respGrant.Body.Close()
@@ -471,7 +483,6 @@ func (p woodpeckerTokenProvider) newRequestWithContext(
 	if err != nil {
 		log.Fatalf("couldn't construct request for url %s: %s", url, err)
 	}
-
 	return req
 }
 
@@ -480,6 +491,7 @@ func (p woodpeckerTokenProvider) do(req *http.Request) *http.Response {
 	if err != nil {
 		log.Fatalf("request to %s failed: %s", req.URL.String(), err)
 	}
+
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices { // accept only 2XX requests
 		b, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
@@ -496,6 +508,15 @@ func (p woodpeckerTokenProvider) getCSRFTokenFromCookies(cookies []*http.Cookie)
 		}
 	}
 	return ""
+}
+
+func (p woodpeckerTokenProvider) extractCSRFAndStateToken(r io.Reader) (csrfToken string, stateToken string) {
+	doc, err := goquery.NewDocumentFromReader(r)
+	if err != nil {
+		log.Fatalln("couldn't parse doc:", err)
+	}
+
+	return doc.Find(`input[name="_csrf"]`).AttrOr("value", ""), doc.Find(`input[name="state"]`).AttrOr("value", "")
 }
 
 func (p woodpeckerTokenProvider) readCSRFTokenFromWoodpeckerWebConfig(r io.Reader) string {

@@ -31,7 +31,6 @@ resource "woodpecker_repository" "test_repo" {
 
 - `allow_pull_requests` (Boolean) Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.
 - `config_file` (String) The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution .woodpecker/*.yml -> .woodpecker/*.yaml -> .woodpecker.yml -> .woodpecker.yaml.
-- `is_gated` (Boolean) when true, every pipeline needs to be approved before being executed
 - `is_trusted` (Boolean) when true, underlying pipeline containers get access to escalated capabilities like mounting volumes
 - `netrc_only_trusted` (Boolean) whether netrc credentials should be only injected into trusted containers, see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers) for more info
 - `timeout` (Number) after this timeout a pipeline has to finish or will be treated as timed out (in minutes)
@@ -44,6 +43,7 @@ resource "woodpecker_repository" "test_repo" {
 - `default_branch` (String) the name of the default branch
 - `forge_remote_id` (String) the unique identifier for the repository on the forge
 - `id` (Number) the repository's id
+- `is_gated` (Boolean) when true, every pipeline needs to be approved before being executed
 - `is_private` (Boolean) whether the repo (SCM) is private
 - `name` (String) the name of the repository
 - `owner` (String) the owner of the repository
