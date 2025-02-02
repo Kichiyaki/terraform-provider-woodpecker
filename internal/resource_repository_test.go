@@ -58,7 +58,6 @@ resource "woodpecker_repository" "test_repo" {
 							strconv.FormatBool(repo1.Private),
 						),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_trusted", "true"),
-						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_gated", "false"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "allow_pull_requests", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "config_file", ""),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "netrc_only_trusted", "true"),
@@ -70,7 +69,6 @@ resource "woodpecker_repository" "test_repo" {
 	full_name = "%s"
 	is_trusted = false
 	visibility = "private"
-	is_gated = true
 	timeout = 30
 	config_file = ".woodpecker2.yaml"
 }
@@ -97,7 +95,6 @@ resource "woodpecker_repository" "test_repo" {
 							strconv.FormatBool(repo1.Private),
 						),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_trusted", "false"),
-						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_gated", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "allow_pull_requests", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "config_file", ".woodpecker2.yaml"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "netrc_only_trusted", "true"),
@@ -132,7 +129,6 @@ resource "woodpecker_repository" "test_repo" {
 							strconv.FormatBool(repo1.Private),
 						),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_trusted", "false"),
-						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_gated", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "allow_pull_requests", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "config_file", ".woodpecker2.yaml"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "netrc_only_trusted", "true"),
@@ -177,7 +173,6 @@ resource "woodpecker_repository" "test_repo" {
 							strconv.FormatBool(repo2.Private),
 						),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_trusted", "false"),
-						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "is_gated", "false"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "allow_pull_requests", "true"),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "config_file", ""),
 						resource.TestCheckResourceAttr("woodpecker_repository.test_repo", "netrc_only_trusted", "true"),

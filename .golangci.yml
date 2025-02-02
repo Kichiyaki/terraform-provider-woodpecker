@@ -5,11 +5,15 @@ run:
 linters:
   disable-all: true
   enable:
+    - gochecknoinits
+    - goprintffuncname
+    - nosprintfhostport
+    - spancheck
+    - gocyclo
     - asasalint
     - asciicheck
     - bodyclose
     - bidichk
-    - exportloopref
     - errcheck
     - gocritic
     - gosec
@@ -28,7 +32,6 @@ linters:
     - lll
     - nestif
     - thelper
-    - nonamedreturns
     - tenv
     - testpackage
     - noctx
@@ -52,17 +55,46 @@ linters:
     - inamedparam
     - sloglint
     - revive
+    - mnd
+    - forbidigo
+    - copyloopvar
+    - intrange
+    - fatcontext
+    - canonicalheader
+    - depguard
+    - errorlint
 
 linters-settings:
+  gocyclo:
+    min-complexity: 10
   tagliatelle:
     case:
       rules:
         json: camel
         bun: snake
+  depguard:
+    rules:
+      main:
+        list-mode: lax
+        deny:
+          - pkg: reflect
+            desc: not allowed
+          - pkg: github.com/pkg/errors
+            desc: Should be replaced by standard lib errors package
   lll:
     line-length: 120
+  forbidigo:
+    forbid:
+      - p: ^print.*$
+        msg: Do not commit print statements.
+      - p: ^fmt\.Print.*$
+        msg: Do not commit print statements.
+      - p: ^log\.Print.*$
+        msg: Do not commit print statements.
+    analyze-types: true
   govet:
     enable:
+      - appends
       - asmdecl
       - assign
       - atomic
@@ -73,6 +105,7 @@ linters-settings:
       - composites
       - copylocks
       - deepequalerrors
+      - defers
       - errorsas
       - findcall
       - framepointer
@@ -87,12 +120,14 @@ linters-settings:
       - shadow
       - shift
       - sigchanyzer
+      - slog
       - sortslice
       - stdmethods
       - stringintconv
       - structtag
       - testinggoroutine
       - tests
+      - timeformat
       - unmarshal
       - unreachable
       - unsafeptr
@@ -102,6 +137,11 @@ linters-settings:
     enable-all: true
   sloglint:
     attr-only: true
+  mnd:
+    ignored-functions:
+      - strconv.FormatInt
+      - strconv.ParseInt
+      - ^gofakeit\.
   revive:
     rules:
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#add-constant
@@ -176,7 +216,7 @@ linters-settings:
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#cyclomatic
       - name: cyclomatic
         severity: warning
-        disabled: false
+        disabled: true
         arguments: [10]
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#datarace
       - name: datarace
@@ -253,12 +293,12 @@ linters-settings:
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#flag-parameter
       - name: flag-parameter
         severity: warning
-        disabled: false
+        disabled: true
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#function-result-limit
       - name: function-result-limit
         severity: warning
         disabled: false
-        arguments: [3]
+        arguments: [4]
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#function-length
       - name: function-length
         severity: warning
@@ -282,7 +322,7 @@ linters-settings:
         disabled: false
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#indent-error-flow
       - name: indent-error-flow
-        severity: warning
+        severity: error
         disabled: false
         arguments:
           - preserveScope
@@ -295,7 +335,8 @@ linters-settings:
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#imports-blacklist
       - name: imports-blacklist
         severity: error
-        disabled: false
+        # depguard is enabled
+        disabled: true
         arguments:
           - reflect
           - github.com/pkg/errors
@@ -429,6 +470,8 @@ linters-settings:
         arguments:
           - fmt.Printf
           - fmt.Println
+          - strings.Builder.*
+          - bytes.Buffer.*
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unnecessary-stmt
       - name: unnecessary-stmt
         severity: error
@@ -455,9 +498,18 @@ linters-settings:
         disabled: false
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#waitgroup-by-value
       - name: waitgroup-by-value
-        severity: warning
+        severity: error
         disabled: false
-
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unchecked-type-assertion
+      - name: unchecked-type-assertion
+        severity: error
+        disabled: false
+        arguments:
+          - acceptIgnoredAssertionResult: true
+      # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
+      - name: use-any
+        severity: error
+        disabled: false
 
 issues:
   exclude-dirs:
@@ -467,8 +519,10 @@ issues:
     - path: _test\.go
       linters:
         - gosec
+        - gocyclo
     - path: _test\.go
       text: deep-exit
     - linters:
         - lll
       source: "^//go:generate "
+

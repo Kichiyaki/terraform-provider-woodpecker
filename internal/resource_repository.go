@@ -153,7 +153,6 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				},
 			},
 			"is_gated": schema.BoolAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "when true, every pipeline needs to be approved before being executed",
 				PlanModifiers: []planmodifier.Bool{

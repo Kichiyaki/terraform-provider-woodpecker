@@ -16,28 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     services:
       dind:
-        image: docker:24.0-dind-rootless
+        image: docker:27-dind-rootless
         ports:
           - 2375:2375
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
           cache: true
+      - uses: hashicorp/setup-terraform@v3
       - run: make generate && go mod tidy && git diff --exit-code go.mod docs/ examples/
-      - uses: golangci/golangci-lint-action@v3
+      - uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.59
-      - name: Gitea 1.21 & Woodpecker 2.0
+          version: v1.63
+      - name: Gitea 1.23 & Woodpecker 2.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
-          GITEA_IMAGE: gitea/gitea:1.21
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.6.0
-      - name: Forgejo 1.21 & Woodpecker 2.0
-        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-        env:
-          GITEA_IMAGE: codeberg.org/forgejo/forgejo:1.21
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.6.0
+          GITEA_IMAGE: gitea/gitea:1.23
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.8.3
