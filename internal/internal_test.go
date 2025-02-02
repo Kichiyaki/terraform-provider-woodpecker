@@ -270,6 +270,7 @@ func runWoodpecker(
 	woodpeckerRsc, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: repo,
 		Tag:        tag,
+		User:       "0:0",
 		Networks:   []*dockertest.Network{network},
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"8000/tcp": {
@@ -352,7 +353,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v2.8.3"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v3.0.1"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {

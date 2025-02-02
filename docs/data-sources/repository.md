@@ -27,20 +27,32 @@ data "woodpecker_repository" "test_repo" {
 
 ### Read-Only
 
+- `allow_deployments` (Boolean) Enables a pipeline to be started with the deploy event from a successful pipeline.
 - `allow_pull_requests` (Boolean) Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.
 - `avatar_url` (String) the repository's avatar URL
+- `cancel_previous_pipeline_events` (Set of String) Enables to cancel pending and running pipelines of the same event and context before starting the newly triggered one (push, tag, pull_request, deployment).
 - `clone_url` (String) the URL to clone repository
 - `config_file` (String) The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution .woodpecker/*.yml -> .woodpecker/*.yaml -> .woodpecker.yml -> .woodpecker.yaml.
 - `default_branch` (String) the name of the default branch
+- `forge_id` (Number) the forge's id
 - `forge_remote_id` (String) the unique identifier for the repository on the forge
+- `forge_url` (String) the URL of the repository on the forge
 - `id` (Number) the repository's id
-- `is_gated` (Boolean) when true, every pipeline needs to be approved before being executed
+- `is_active` (Boolean) whether the repo is active
 - `is_private` (Boolean) whether the repo (SCM) is private
-- `is_trusted` (Boolean) when true, underlying pipeline containers get access to escalated capabilities like mounting volumes
 - `name` (String) the name of the repository
-- `netrc_only_trusted` (Boolean) whether netrc credentials should be only injected into trusted containers, see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers) for more info
+- `netrc_trusted_plugins` (Set of String) Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge.
 - `owner` (String) the owner of the repository
-- `scm` (String) type of repository (see [the source code](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/const.go#L67))
+- `require_approval` (String) Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution. Allowed values: forks, pull_requests, all_events
 - `timeout` (Number) after this timeout a pipeline has to finish or will be treated as timed out (in minutes)
-- `url` (String) the URL of the repository on the forge
+- `trusted` (Attributes) (see [below for nested schema](#nestedatt--trusted))
 - `visibility` (String) project visibility (public, private, internal), see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#project-visibility) for more info
+
+<a id="nestedatt--trusted"></a>
+### Nested Schema for `trusted`
+
+Read-Only:
+
+- `network` (Boolean) Pipeline containers get access to network privileges like changing DNS.
+- `security` (Boolean) Pipeline containers get access to security privileges.
+- `volumes` (Boolean) Pipeline containers are allowed to mount volumes.

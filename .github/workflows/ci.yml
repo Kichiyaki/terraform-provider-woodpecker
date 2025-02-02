@@ -32,8 +32,8 @@ jobs:
       - uses: golangci/golangci-lint-action@v6
         with:
           version: v1.63
-      - name: Gitea 1.23 & Woodpecker 2.0
+      - name: Gitea 1.23 & Woodpecker 3.0
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
           GITEA_IMAGE: gitea/gitea:1.23
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v2.8.3
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v3.0.1

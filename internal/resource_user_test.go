@@ -32,10 +32,10 @@ resource "woodpecker_user" "test_user" {
 `, login),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
+					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "forge_id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", login),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", ""),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", ""),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "false"),
 				),
 			},
@@ -50,10 +50,10 @@ resource "woodpecker_user" "test_user" {
 `, login, login, login),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
+					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "forge_id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", login),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", login+"@localhost"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", "http://localhost/"+login),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "true"),
 				),
 			},
@@ -66,10 +66,10 @@ resource "woodpecker_user" "test_user" {
 `, login),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
+					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "forge_id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", login),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", login+"@localhost"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", "http://localhost/"+login),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "false"),
 				),
 			},
@@ -92,10 +92,10 @@ resource "woodpecker_user" "test_user" {
 				},
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "id"),
+					resource.TestCheckResourceAttrSet("woodpecker_user.test_user", "forge_id"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "login", newLogin),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "email", ""),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "avatar_url", ""),
-					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_active", "false"),
 					resource.TestCheckResourceAttr("woodpecker_user.test_user", "is_admin", "false"),
 				),
 			},
@@ -105,7 +105,7 @@ resource "woodpecker_user" "test_user" {
 
 func checkUserResourceDestroy(logins ...string) func(state *terraform.State) error {
 	return func(_ *terraform.State) error {
-		users, err := woodpeckerClient.UserList()
+		users, err := woodpeckerClient.UserList(woodpecker.UserListOptions{})
 		if err != nil {
 			return fmt.Errorf("couldn't list users: %w", err)
 		}

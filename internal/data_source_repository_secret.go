@@ -53,7 +53,17 @@ func (d *repositorySecretDataSource) Schema(
 				ElementType: types.StringType,
 				Computed:    true,
 				Description: "events for which the secret is available " +
-					"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
+					fmt.Sprintf(
+						"(%s, %s, %s, %s, %s, %s, %s, %s)",
+						woodpecker.EventPush,
+						woodpecker.EventTag,
+						woodpecker.EventPull,
+						woodpecker.EventPullClosed,
+						woodpecker.EventDeploy,
+						woodpecker.EventCron,
+						woodpecker.EventManual,
+						woodpecker.EventRelease,
+					),
 			},
 			"images": schema.SetAttribute{
 				ElementType: types.StringType,

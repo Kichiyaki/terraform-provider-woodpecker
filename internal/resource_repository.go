@@ -4,19 +4,22 @@ import (
 	"context"
 	"fmt"
 	"slices"
-	"strconv"
 
 	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type repositoryResource struct {
@@ -50,9 +53,30 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
+			"forge_id": schema.Int64Attribute{
+				Computed:    true,
+				Description: "the forge's id",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
+			},
 			"forge_remote_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "the unique identifier for the repository on the forge",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"forge_url": schema.StringAttribute{
+				Computed:    true,
+				Description: "the URL of the repository on the forge",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"clone_url": schema.StringAttribute{
+				Computed:    true,
+				Description: "the URL to clone repository",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -85,31 +109,9 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"url": schema.StringAttribute{
-				Computed:    true,
-				Description: "the URL of the repository on the forge",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"clone_url": schema.StringAttribute{
-				Computed:    true,
-				Description: "the URL to clone repository",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"default_branch": schema.StringAttribute{
 				Computed:    true,
 				Description: "the name of the default branch",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"scm": schema.StringAttribute{
-				Computed: true,
-				MarkdownDescription: "type of repository " +
-					"(see [the source code](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/const.go#L67))",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -128,10 +130,19 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			"visibility": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
-				MarkdownDescription: "project visibility (public, private, internal), " +
+				MarkdownDescription: fmt.Sprintf(
+					"project visibility (%s, %s, %s), ",
+					woodpecker.VisibilityModePublic.String(),
+					woodpecker.VisibilityModePrivate.String(),
+					woodpecker.VisibilityModeInternal.String(),
+				) +
 					"see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#project-visibility) for more info",
 				Validators: []validator.String{
-					stringvalidator.OneOfCaseInsensitive("public", "private", "internal"),
+					stringvalidator.OneOf(
+						woodpecker.VisibilityModePublic.String(),
+						woodpecker.VisibilityModePrivate.String(),
+						woodpecker.VisibilityModeInternal.String(),
+					),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -144,17 +155,64 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"is_trusted": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "when true, underlying pipeline containers get access to escalated capabilities like mounting volumes",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
+			"trusted": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"network": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Pipeline containers get access to network privileges like changing DNS.",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"security": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Pipeline containers get access to security privileges.",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"volumes": schema.BoolAttribute{
+						Optional:    true,
+						Computed:    true,
+						Description: "Pipeline containers are allowed to mount volumes.",
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+				},
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"is_gated": schema.BoolAttribute{
+			"require_approval": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				Description: "Prevent malicious pipelines from exposing secrets or " +
+					"running harmful tasks by approving them before execution. " +
+					fmt.Sprintf(
+						"Allowed values: %s, %s, %s",
+						woodpecker.ApprovalModeForks.String(),
+						woodpecker.ApprovalModePullRequests.String(),
+						woodpecker.ApprovalModeAllEvents.String(),
+					),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						woodpecker.ApprovalModeForks.String(),
+						woodpecker.ApprovalModePullRequests.String(),
+						woodpecker.ApprovalModeAllEvents.String(),
+					),
+				},
+			},
+			"is_active": schema.BoolAttribute{
 				Computed:    true,
-				Description: "when true, every pipeline needs to be approved before being executed",
+				Description: "whether the repo is active",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -164,6 +222,14 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Computed: true,
 				Description: "Enables handling webhook's pull request event." +
 					" If disabled, then pipeline won't run for pull requests.",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"allow_deployments": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Enables a pipeline to be started with the deploy event from a successful pipeline.",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -178,28 +244,40 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			// woodpecker.Client doesn't support editing this field for now
-			// "cancel_previous_pipeline_events": schema.SetAttribute{
-			//	ElementType: types.StringType,
-			//	Optional:    true,
-			//	Computed:    true,
-			//	Description: "Enables to cancel pending and running pipelines of the same " +
-			//		"event and context before starting the newly triggered one (push, tag, pull_request, deployment).",
-			//	Validators: []validator.Set{
-			//		setvalidator.ValueStringsAre(
-			//			stringvalidator.OneOfCaseInsensitive("push", "tag", "pull_request", "deployment"),
-			//		),
-			//	},
-			// },
-			"netrc_only_trusted": schema.BoolAttribute{
-				Optional: true,
-				Computed: true,
-				MarkdownDescription: "whether netrc credentials should be only injected into trusted containers, see" +
-					//nolint:lll
-					" [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers)" +
-					" for more info",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
+			"cancel_previous_pipeline_events": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Description: "Enables to cancel pending and running pipelines of the same " +
+					fmt.Sprintf(
+						"event and context before starting the newly triggered one (%s, %s, %s, %s).",
+						woodpecker.EventPush,
+						woodpecker.EventTag,
+						woodpecker.EventPull,
+						woodpecker.EventDeploy,
+					),
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(
+						stringvalidator.OneOf(
+							woodpecker.EventPush,
+							woodpecker.EventTag,
+							woodpecker.EventPull,
+							woodpecker.EventDeploy,
+						),
+					),
+				},
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"netrc_trusted_plugins": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Description: "Plugins that get access to netrc credentials that can " +
+					"be used to clone repositories from the forge or push them into the forge.",
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},
@@ -241,7 +319,7 @@ func (r *repositoryResource) Create(ctx context.Context, req resource.CreateRequ
 
 	repoFullName := data.FullName.ValueString()
 
-	repos, err := r.client.RepoListOpts(true)
+	repos, err := r.client.RepoList(woodpecker.RepoListOptions{All: true})
 	if err != nil {
 		resp.Diagnostics.AddError("Couldn't list repositories", err.Error())
 		return
@@ -261,14 +339,9 @@ func (r *repositoryResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	forgeRemoteID, err := strconv.ParseInt(repos[idx].ForgeRemoteID, 10, 64)
-	if err != nil {
-		resp.Diagnostics.AddError("Couldn't parse ForgeRemoteID", err.Error())
-		return
-	}
-
-	// I'm not sure why this function wants int64 instead of string
-	activatedRepo, err := r.client.RepoPost(forgeRemoteID)
+	activatedRepo, err := r.client.RepoPost(woodpecker.RepoPostOptions{
+		ForgeRemoteID: repos[idx].ForgeRemoteID,
+	})
 	if err != nil {
 		resp.Diagnostics.AddError("Couldn't activate repository", err.Error())
 		return
