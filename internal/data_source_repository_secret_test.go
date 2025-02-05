@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -28,19 +29,23 @@ resource "woodpecker_repository_secret" "test_secret" {
 	repository_id = woodpecker_repository.test_repo.id
 	name = "%s"
 	value = "test123"
-	events = ["push"]
+	events = ["%s"]
 }
 
 data "woodpecker_repository_secret" "test_secret" {
 	repository_id = woodpecker_repository_secret.test_secret.repository_id
 	name = woodpecker_repository_secret.test_secret.name
 }
-`, repo.FullName, name),
+`, repo.FullName, name, woodpecker.EventPush),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.woodpecker_repository_secret.test_secret", "id"),
 					resource.TestCheckResourceAttrSet("data.woodpecker_repository_secret.test_secret", "repository_id"),
 					resource.TestCheckResourceAttr("data.woodpecker_repository_secret.test_secret", "name", name),
-					resource.TestCheckTypeSetElemAttr("data.woodpecker_repository_secret.test_secret", "events.*", "push"),
+					resource.TestCheckTypeSetElemAttr(
+						"data.woodpecker_repository_secret.test_secret",
+						"events.*",
+						woodpecker.EventPush,
+					),
 				),
 			},
 		},

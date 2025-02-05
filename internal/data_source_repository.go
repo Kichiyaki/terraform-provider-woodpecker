@@ -7,6 +7,7 @@ import (
 	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type repositoryDataSource struct {
@@ -40,6 +41,10 @@ func (d *repositoryDataSource) Schema(
 				Computed:    true,
 				Description: "the repository's id",
 			},
+			"forge_id": schema.Int64Attribute{
+				Computed:    true,
+				Description: "the forge's id",
+			},
 			"forge_remote_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "the unique identifier for the repository on the forge",
@@ -60,7 +65,7 @@ func (d *repositoryDataSource) Schema(
 				Computed:    true,
 				Description: "the repository's avatar URL",
 			},
-			"url": schema.StringAttribute{
+			"forge_url": schema.StringAttribute{
 				Computed:    true,
 				Description: "the URL of the repository on the forge",
 			},
@@ -72,36 +77,64 @@ func (d *repositoryDataSource) Schema(
 				Computed:    true,
 				Description: "the name of the default branch",
 			},
-			"scm": schema.StringAttribute{
-				Computed: true,
-				MarkdownDescription: "type of repository " +
-					"(see [the source code](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/const.go#L67))",
-			},
 			"timeout": schema.Int64Attribute{
 				Computed:    true,
 				Description: "after this timeout a pipeline has to finish or will be treated as timed out (in minutes)",
 			},
 			"visibility": schema.StringAttribute{
 				Computed: true,
-				MarkdownDescription: "project visibility (public, private, internal), " +
+				MarkdownDescription: fmt.Sprintf(
+					"project visibility (%s, %s, %s), ",
+					woodpecker.VisibilityModePublic.String(),
+					woodpecker.VisibilityModePrivate.String(),
+					woodpecker.VisibilityModeInternal.String(),
+				) +
 					"see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#project-visibility) for more info",
 			},
 			"is_private": schema.BoolAttribute{
 				Computed:    true,
 				Description: "whether the repo (SCM) is private",
 			},
-			"is_trusted": schema.BoolAttribute{
-				Computed:    true,
-				Description: "when true, underlying pipeline containers get access to escalated capabilities like mounting volumes",
+			"trusted": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"network": schema.BoolAttribute{
+						Computed:    true,
+						Description: "Pipeline containers get access to network privileges like changing DNS.",
+					},
+					"security": schema.BoolAttribute{
+						Computed:    true,
+						Description: "Pipeline containers get access to security privileges.",
+					},
+					"volumes": schema.BoolAttribute{
+						Computed:    true,
+						Description: "Pipeline containers are allowed to mount volumes.",
+					},
+				},
+				Computed: true,
 			},
-			"is_gated": schema.BoolAttribute{
+			"require_approval": schema.StringAttribute{
+				Computed: true,
+				Description: "Prevent malicious pipelines from exposing secrets or " +
+					"running harmful tasks by approving them before execution. " +
+					fmt.Sprintf(
+						"Allowed values: %s, %s, %s",
+						woodpecker.ApprovalModeForks.String(),
+						woodpecker.ApprovalModePullRequests.String(),
+						woodpecker.ApprovalModeAllEvents.String(),
+					),
+			},
+			"is_active": schema.BoolAttribute{
 				Computed:    true,
-				Description: "when true, every pipeline needs to be approved before being executed",
+				Description: "whether the repo is active",
 			},
 			"allow_pull_requests": schema.BoolAttribute{
 				Computed: true,
 				Description: "Enables handling webhook's pull request event." +
 					" If disabled, then pipeline won't run for pull requests.",
+			},
+			"allow_deployments": schema.BoolAttribute{
+				Computed:    true,
+				Description: "Enables a pipeline to be started with the deploy event from a successful pipeline.",
 			},
 			"config_file": schema.StringAttribute{
 				Computed: true,
@@ -109,11 +142,23 @@ func (d *repositoryDataSource) Schema(
 					"By default it is left empty which will use the following configuration " +
 					"resolution .woodpecker/*.yml -> .woodpecker/*.yaml -> .woodpecker.yml -> .woodpecker.yaml.",
 			},
-			"netrc_only_trusted": schema.BoolAttribute{
-				Computed: true,
-				MarkdownDescription: "whether netrc credentials should be only injected into trusted containers, " +
-					//nolint:lll
-					"see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#only-inject-netrc-credentials-into-trusted-containers) for more info",
+			"cancel_previous_pipeline_events": schema.SetAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
+				Description: "Enables to cancel pending and running pipelines of the same " +
+					fmt.Sprintf(
+						"event and context before starting the newly triggered one (%s, %s, %s, %s).",
+						woodpecker.EventPush,
+						woodpecker.EventTag,
+						woodpecker.EventPull,
+						woodpecker.EventDeploy,
+					),
+			},
+			"netrc_trusted_plugins": schema.SetAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
+				Description: "Plugins that get access to netrc credentials that can " +
+					"be used to clone repositories from the forge or push them into the forge.",
 			},
 		},
 	}

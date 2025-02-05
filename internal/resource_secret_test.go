@@ -33,14 +33,14 @@ func TestSecretResource(t *testing.T) {
 resource "woodpecker_secret" "test_secret" {
 	name = "%s"
 	value = "test123"
-	events = ["push"]
+	events = ["%s"]
 }
-`, name),
+`, name, woodpecker.EventPush),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_secret.test_secret", "id"),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "value", "test123"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "push"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventPush),
 					),
 				},
 				{ // update secret
@@ -48,16 +48,16 @@ resource "woodpecker_secret" "test_secret" {
 resource "woodpecker_secret" "test_secret" {
 	name = "%s"
 	value = "test123123"
-	events = ["push", "deployment"]
+	events = ["%s", "%s"]
 	images = ["testimage"]
 }
-`, name),
+`, name, woodpecker.EventPush, woodpecker.EventDeploy),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_secret.test_secret", "id"),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "value", "test123123"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "push"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "deployment"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventPush),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventDeploy),
 						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "images.*", "testimage"),
 					),
 				},
@@ -66,16 +66,16 @@ resource "woodpecker_secret" "test_secret" {
 resource "woodpecker_secret" "test_secret" {
 	name = "%s"
 	value = "test123123"
-	events = ["push", "deployment", "cron"]
+	events = ["%s", "%s", "%s"]
 }
-//`, name),
+`, name, woodpecker.EventPush, woodpecker.EventDeploy, woodpecker.EventCron),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_secret.test_secret", "id"),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "name", name),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "value", "test123123"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "push"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "deployment"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "cron"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventPush),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventDeploy),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventCron),
 						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "images.*", "testimage"),
 					),
 				},
@@ -91,9 +91,9 @@ resource "woodpecker_secret" "test_secret" {
 resource "woodpecker_secret" "test_secret" {
 	name = "%s"
 	value = "test123New"
-	events = ["push"]
+	events = ["%s"]
 }
-`, newName),
+`, newName, woodpecker.EventPush),
 					ConfigPlanChecks: resource.ConfigPlanChecks{
 						PreApply: []plancheck.PlanCheck{
 							plancheck.ExpectResourceAction("woodpecker_secret.test_secret", plancheck.ResourceActionReplace),
@@ -103,7 +103,7 @@ resource "woodpecker_secret" "test_secret" {
 						resource.TestCheckResourceAttrSet("woodpecker_secret.test_secret", "id"),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "name", newName),
 						resource.TestCheckResourceAttr("woodpecker_secret.test_secret", "value", "test123New"),
-						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", "push"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_secret.test_secret", "events.*", woodpecker.EventPush),
 					),
 				},
 			},
@@ -134,7 +134,7 @@ resource "woodpecker_secret" "test_secret" {
 
 func checkSecretResourceDestroy(names ...string) func(state *terraform.State) error {
 	return func(_ *terraform.State) error {
-		secrets, err := woodpeckerClient.GlobalSecretList()
+		secrets, err := woodpeckerClient.GlobalSecretList(woodpecker.SecretListOptions{})
 		if err != nil {
 			return fmt.Errorf("couldn't list secrets: %w", err)
 		}

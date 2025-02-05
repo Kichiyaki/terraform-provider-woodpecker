@@ -39,9 +39,11 @@ func (p *woodpeckerProvider) Metadata(_ context.Context, _ provider.MetadataRequ
 
 func (p *woodpeckerProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "A Terraform provider used to interact with Woodpecker CI resources.",
 		MarkdownDescription: "A Terraform provider used to interact with" +
 			" [Woodpecker CI](https://woodpecker-ci.org/) resources." +
-			"\n\n\n- v0.2.x and later versions of the provider work with Woodpecker 2.x+" +
+			"\n\n\n- v0.4.x and later versions of the provider work with Woodpecker 3.x+" +
+			"\n- v0.2.x and v0.3.x versions of the provider work with Woodpecker 3.0.0>1.x>=2.0.0" +
 			"\n- v0.1.x version of the provider works with Woodpecker 2.0.0>1.x>=1.0.0",
 		Attributes: map[string]schema.Attribute{
 			"server": schema.StringAttribute{
@@ -164,7 +166,7 @@ func newClient(
 		return nil
 	}
 
-	c, err := semver.NewConstraint(">= 2.0.0")
+	c, err := semver.NewConstraint(">= 3.0.0")
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Couldn't parse woodpecker version constraint",

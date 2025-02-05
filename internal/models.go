@@ -4,37 +4,39 @@ import (
 	"context"
 
 	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type userModel struct {
 	ID        types.Int64  `tfsdk:"id"`
+	ForgeID   types.Int64  `tfsdk:"forge_id"`
 	Login     types.String `tfsdk:"login"`
 	Email     types.String `tfsdk:"email"`
 	AvatarURL types.String `tfsdk:"avatar_url"`
-	Active    types.Bool   `tfsdk:"is_active"`
-	Admin     types.Bool   `tfsdk:"is_admin"`
+	IsAdmin   types.Bool   `tfsdk:"is_admin"`
 }
 
 func (m *userModel) setValues(_ context.Context, user *woodpecker.User) diag.Diagnostics {
 	m.ID = types.Int64Value(user.ID)
+	m.ForgeID = types.Int64Value(user.ForgeID)
 	m.Login = types.StringValue(user.Login)
 	m.Email = types.StringValue(user.Email)
 	m.AvatarURL = types.StringValue(user.Avatar)
-	m.Active = types.BoolValue(user.Active)
-	m.Admin = types.BoolValue(user.Admin)
+	m.IsAdmin = types.BoolValue(user.Admin)
 	return nil
 }
 
 func (m *userModel) toWoodpeckerModel(_ context.Context) (*woodpecker.User, diag.Diagnostics) {
 	return &woodpecker.User{
-		ID:     m.ID.ValueInt64(),
-		Login:  m.Login.ValueString(),
-		Email:  m.Email.ValueString(),
-		Avatar: m.AvatarURL.ValueString(),
-		Active: m.Active.ValueBool(),
-		Admin:  m.Admin.ValueBool(),
+		ID:      m.ID.ValueInt64(),
+		ForgeID: m.ForgeID.ValueInt64(),
+		Login:   m.Login.ValueString(),
+		Email:   m.Email.ValueString(),
+		Avatar:  m.AvatarURL.ValueString(),
+		Admin:   m.IsAdmin.ValueBool(),
 	}, nil
 }
 
@@ -105,57 +107,109 @@ func (m *secretDataSourceModel) setValues(ctx context.Context, secret *woodpecke
 }
 
 type repositoryModel struct {
-	ID                types.Int64  `tfsdk:"id"`
-	ForgeRemoteID     types.String `tfsdk:"forge_remote_id"`
-	Owner             types.String `tfsdk:"owner"`
-	Name              types.String `tfsdk:"name"`
-	FullName          types.String `tfsdk:"full_name"`
-	AvatarURL         types.String `tfsdk:"avatar_url"`
-	URL               types.String `tfsdk:"url"`
-	CloneURL          types.String `tfsdk:"clone_url"`
-	DefaultBranch     types.String `tfsdk:"default_branch"`
-	SCMKind           types.String `tfsdk:"scm"`
-	Timeout           types.Int64  `tfsdk:"timeout"`
-	Visibility        types.String `tfsdk:"visibility"`
-	IsSCMPrivate      types.Bool   `tfsdk:"is_private"`
-	IsTrusted         types.Bool   `tfsdk:"is_trusted"`
-	IsGated           types.Bool   `tfsdk:"is_gated"`
-	AllowPullRequests types.Bool   `tfsdk:"allow_pull_requests"`
-	ConfigFile        types.String `tfsdk:"config_file"`
-	NetrcOnlyTrusted  types.Bool   `tfsdk:"netrc_only_trusted"`
+	ID                           types.Int64  `tfsdk:"id"`
+	ForgeID                      types.Int64  `tfsdk:"forge_id"`
+	ForgeRemoteID                types.String `tfsdk:"forge_remote_id"`
+	Owner                        types.String `tfsdk:"owner"`
+	Name                         types.String `tfsdk:"name"`
+	FullName                     types.String `tfsdk:"full_name"`
+	AvatarURL                    types.String `tfsdk:"avatar_url"`
+	ForgeURL                     types.String `tfsdk:"forge_url"`
+	CloneURL                     types.String `tfsdk:"clone_url"`
+	DefaultBranch                types.String `tfsdk:"default_branch"`
+	Timeout                      types.Int64  `tfsdk:"timeout"`
+	Visibility                   types.String `tfsdk:"visibility"`
+	IsPrivate                    types.Bool   `tfsdk:"is_private"`
+	Trusted                      types.Object `tfsdk:"trusted"`
+	RequireApproval              types.String `tfsdk:"require_approval"`
+	IsActive                     types.Bool   `tfsdk:"is_active"`
+	AllowPullRequests            types.Bool   `tfsdk:"allow_pull_requests"`
+	AllowDeployments             types.Bool   `tfsdk:"allow_deployments"`
+	ConfigFile                   types.String `tfsdk:"config_file"`
+	CancelPreviousPipelineEvents types.Set    `tfsdk:"cancel_previous_pipeline_events"`
+	NetrcTrustedPlugins          types.Set    `tfsdk:"netrc_trusted_plugins"`
 }
 
-func (m *repositoryModel) setValues(_ context.Context, repo *woodpecker.Repo) diag.Diagnostics {
+var repositoryModelTrustedAttributes = map[string]attr.Type{
+	"network":  types.BoolType,
+	"volumes":  types.BoolType,
+	"security": types.BoolType,
+}
+
+func (m *repositoryModel) setValues(ctx context.Context, repo *woodpecker.Repo) diag.Diagnostics {
+	var diagsRes diag.Diagnostics
+	var diags diag.Diagnostics
+
 	m.ID = types.Int64Value(repo.ID)
+	m.ForgeID = types.Int64Value(repo.ForgeID)
 	m.ForgeRemoteID = types.StringValue(repo.ForgeRemoteID)
 	m.Owner = types.StringValue(repo.Owner)
 	m.Name = types.StringValue(repo.Name)
 	m.FullName = types.StringValue(repo.FullName)
 	m.AvatarURL = types.StringValue(repo.Avatar)
-	m.URL = types.StringValue(repo.ForgeURL)
+	m.ForgeURL = types.StringValue(repo.ForgeURL)
 	m.CloneURL = types.StringValue(repo.Clone)
-	m.DefaultBranch = types.StringValue(repo.DefaultBranch)
-	m.SCMKind = types.StringValue(repo.SCMKind)
+	m.DefaultBranch = types.StringValue(repo.Branch)
 	m.Timeout = types.Int64Value(repo.Timeout)
-	m.Visibility = types.StringValue(repo.Visibility)
-	m.IsSCMPrivate = types.BoolValue(repo.IsSCMPrivate)
-	m.IsTrusted = types.BoolValue(repo.IsTrusted)
-	m.IsGated = types.BoolValue(repo.IsGated)
+	m.Visibility = types.StringValue(repo.Visibility.String())
+	m.IsPrivate = types.BoolValue(repo.IsSCMPrivate)
+	m.Trusted, diags = types.ObjectValue(
+		repositoryModelTrustedAttributes,
+		map[string]attr.Value{
+			"network":  types.BoolValue(repo.Trusted.Network),
+			"volumes":  types.BoolValue(repo.Trusted.Volumes),
+			"security": types.BoolValue(repo.Trusted.Security),
+		},
+	)
+	diagsRes.Append(diags...)
+	m.RequireApproval = types.StringValue(repo.RequireApproval.String())
+	m.IsActive = types.BoolValue(repo.IsActive)
 	m.AllowPullRequests = types.BoolValue(repo.AllowPullRequests)
+	m.AllowDeployments = types.BoolValue(repo.AllowDeployments)
 	m.ConfigFile = types.StringValue(repo.Config)
-	m.NetrcOnlyTrusted = types.BoolValue(repo.NetrcOnlyTrusted)
-	return nil
+	m.CancelPreviousPipelineEvents, diags = types.SetValueFrom(ctx, types.StringType, repo.CancelPreviousPipelineEvents)
+	diagsRes.Append(diags...)
+	m.NetrcTrustedPlugins, diags = types.SetValueFrom(ctx, types.StringType, repo.NetrcTrustedPlugins)
+	diagsRes.Append(diags...)
+
+	return diagsRes
 }
 
-func (m *repositoryModel) toWoodpeckerPatch(_ context.Context) (*woodpecker.RepoPatch, diag.Diagnostics) {
-	return &woodpecker.RepoPatch{
-		Config:     m.ConfigFile.ValueStringPointer(),
-		IsTrusted:  m.IsTrusted.ValueBoolPointer(),
-		IsGated:    m.IsGated.ValueBoolPointer(),
-		Timeout:    m.Timeout.ValueInt64Pointer(),
-		Visibility: m.Visibility.ValueStringPointer(),
-		AllowPull:  m.AllowPullRequests.ValueBoolPointer(),
-	}, nil
+type trustedConfigurationPatchModel struct {
+	Network  types.Bool `tfsdk:"network"`
+	Volumes  types.Bool `tfsdk:"volumes"`
+	Security types.Bool `tfsdk:"security"`
+}
+
+func (m *repositoryModel) toWoodpeckerPatch(ctx context.Context) (*woodpecker.RepoPatch, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	repo := &woodpecker.RepoPatch{
+		Config:            m.ConfigFile.ValueStringPointer(),
+		Timeout:           m.Timeout.ValueInt64Pointer(),
+		AllowPullRequests: m.AllowPullRequests.ValueBoolPointer(),
+		AllowDeployments:  m.AllowDeployments.ValueBoolPointer(),
+	}
+
+	if visibility := m.Visibility.ValueStringPointer(); visibility != nil {
+		converted := woodpecker.VisibilityMode(*visibility)
+		repo.Visibility = &converted
+	}
+
+	diags.Append(m.CancelPreviousPipelineEvents.ElementsAs(ctx, &repo.CancelPreviousPipelineEvents, false)...)
+	diags.Append(m.NetrcTrustedPlugins.ElementsAs(ctx, &repo.NetrcTrustedPlugins, true)...)
+
+	var trusted *trustedConfigurationPatchModel
+	diags.Append(m.Trusted.As(ctx, &trusted, basetypes.ObjectAsOptions{UnhandledUnknownAsEmpty: true})...)
+	if trusted != nil {
+		repo.Trusted = &woodpecker.TrustedConfigurationPatch{
+			Network:  trusted.Network.ValueBoolPointer(),
+			Volumes:  trusted.Volumes.ValueBoolPointer(),
+			Security: trusted.Security.ValueBoolPointer(),
+		}
+	}
+
+	return repo, diags
 }
 
 type repositorySecretResourceModelV0 struct {

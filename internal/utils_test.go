@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"strconv"
 	"sync"
 	"testing"
 
@@ -55,7 +56,9 @@ func activateRepo(tb testing.TB, giteaRepo *gitea.Repository) *woodpecker.Repo {
 	activateRepoMu.Lock()
 	defer activateRepoMu.Unlock()
 
-	repo, err := woodpeckerClient.RepoPost(giteaRepo.ID)
+	repo, err := woodpeckerClient.RepoPost(woodpecker.RepoPostOptions{
+		ForgeRemoteID: strconv.FormatInt(giteaRepo.ID, 10),
+	})
 	if err != nil {
 		tb.Fatalf("got unexpected error while activating repo: %s", err)
 	}

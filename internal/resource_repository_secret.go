@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -86,7 +85,7 @@ func (r *repositorySecretResource) Schema(_ context.Context, _ resource.SchemaRe
 					"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(
-						stringvalidator.OneOfCaseInsensitive(
+						stringvalidator.OneOf(
 							"push",
 							"tag",
 							"pull_request",
@@ -311,32 +310,33 @@ func (r *repositorySecretResource) UpgradeState(_ context.Context) map[int64]res
 						ElementType: types.StringType,
 						Required:    true,
 						Description: "events for which the secret is available " +
-							"(push, tag, pull_request, pull_request_closed, deployment, cron, manual, release)",
+							fmt.Sprintf(
+								"(%s, %s, %s, %s, %s, %s, %s, %s)",
+								woodpecker.EventPush,
+								woodpecker.EventTag,
+								woodpecker.EventPull,
+								woodpecker.EventPullClosed,
+								woodpecker.EventDeploy,
+								woodpecker.EventCron,
+								woodpecker.EventManual,
+								woodpecker.EventRelease,
+							),
 						Validators: []validator.Set{
 							setvalidator.ValueStringsAre(
-								stringvalidator.OneOfCaseInsensitive(
-									"push",
-									"tag",
-									"pull_request",
-									"pull_request_closed",
-									"deployment",
-									"cron",
-									"manual",
-									"release",
+								stringvalidator.OneOf(
+									woodpecker.EventPush,
+									woodpecker.EventTag,
+									woodpecker.EventPull,
+									woodpecker.EventPullClosed,
+									woodpecker.EventDeploy,
+									woodpecker.EventCron,
+									woodpecker.EventManual,
+									woodpecker.EventRelease,
 								),
 							),
 						},
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
-						},
-					},
-					"plugins_only": schema.BoolAttribute{
-						Optional: true,
-						Computed: true,
-						MarkdownDescription: "whether secret is only available for" +
-							" [plugins](https://woodpecker-ci.org/docs/usage/plugins/plugins)",
-						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"images": schema.SetAttribute{

@@ -4,7 +4,7 @@ page_title: "woodpecker Provider"
 subcategory: ""
 description: |-
   A Terraform provider used to interact with Woodpecker CI https://woodpecker-ci.org/ resources.
-  v0.2.x and later versions of the provider work with Woodpecker 2.x+v0.1.x version of the provider works with Woodpecker 2.0.0>1.x>=1.0.0
+  v0.4.x and later versions of the provider work with Woodpecker 3.x+v0.2.x and v0.3.x versions of the provider work with Woodpecker 3.0.0>1.x>=2.0.0v0.1.x version of the provider works with Woodpecker 2.0.0>1.x>=1.0.0
 ---
 
 # woodpecker Provider
@@ -12,7 +12,8 @@ description: |-
 A Terraform provider used to interact with [Woodpecker CI](https://woodpecker-ci.org/) resources.
 
 
-- v0.2.x and later versions of the provider work with Woodpecker 2.x+
+- v0.4.x and later versions of the provider work with Woodpecker 3.x+
+- v0.2.x and v0.3.x versions of the provider work with Woodpecker 3.0.0>1.x>=2.0.0
 - v0.1.x version of the provider works with Woodpecker 2.0.0>1.x>=1.0.0
 
 ## Example Usage
