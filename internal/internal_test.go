@@ -33,19 +33,21 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	os.Exit(testMainNoExit(m))
+}
+
+func testMainNoExit(m *testing.M) int {
 	pool := newDockertestPool()
 
-	var deferFuncs []func()
-
 	network := newDockerNetwork(pool)
-	deferFuncs = append(deferFuncs, func() {
+	defer func() {
 		_ = network.Close()
-	})
+	}()
 
 	resourceGitea := runGitea(pool, network)
-	deferFuncs = append(deferFuncs, func() {
+	defer func() {
 		_ = resourceGitea.Close()
-	})
+	}()
 
 	giteaClient = newGiteaClient(resourceGitea.httpURL, resourceGitea.user)
 
@@ -56,9 +58,9 @@ func TestMain(m *testing.M) {
 		resourceGitea.privateHTTPURL,
 		resourceGitea.user,
 	)
-	deferFuncs = append(deferFuncs, func() {
+	defer func() {
 		_ = resourceWoodpecker.Close()
-	})
+	}()
 
 	woodpeckerClient = newWoodpeckerClient(resourceWoodpecker.httpURL, resourceWoodpecker.token)
 
@@ -67,14 +69,7 @@ func TestMain(m *testing.M) {
 	_ = os.Setenv("WOODPECKER_SERVER", resourceWoodpecker.httpURL.String())
 	_ = os.Setenv("WOODPECKER_TOKEN", resourceWoodpecker.token)
 
-	code := m.Run()
-
-	// LIFO
-	for i := len(deferFuncs) - 1; i >= 0; i-- {
-		deferFuncs[i]()
-	}
-
-	os.Exit(code)
+	return m.Run()
 }
 
 func newDockertestPool() *dockertest.Pool {
@@ -353,7 +348,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v3.0.1"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v3.6.0"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {
@@ -511,6 +506,7 @@ func (p woodpeckerTokenProvider) getCSRFTokenFromCookies(cookies []*http.Cookie)
 	return ""
 }
 
+//nolint:nonamedreturns
 func (p woodpeckerTokenProvider) extractCSRFAndStateToken(r io.Reader) (csrfToken string, stateToken string) {
 	doc, err := goquery.NewDocumentFromReader(r)
 	if err != nil {

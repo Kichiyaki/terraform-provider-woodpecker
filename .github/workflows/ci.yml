@@ -29,11 +29,12 @@ jobs:
           cache: true
       - uses: hashicorp/setup-terraform@v3
       - run: make generate && go mod tidy && git diff --exit-code go.mod docs/ examples/
-      - uses: golangci/golangci-lint-action@v6
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.63
-      - name: Gitea 1.23 & Woodpecker 3.0
+          version: v2.1
+      - name: Gitea 1.23 & Woodpecker 3.6
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:
           GITEA_IMAGE: gitea/gitea:1.23
-          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v3.0.1
+          WOODPECKER_IMAGE: woodpeckerci/woodpecker-server:v3.6.0
