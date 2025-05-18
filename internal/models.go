@@ -79,7 +79,7 @@ func (m *secretResourceModelV1) toWoodpeckerModel(ctx context.Context) (*woodpec
 		Name:  m.Name.ValueString(),
 		Value: m.Value.ValueString(),
 	}
-	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, false)...)
+	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, true)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
 
 	return secret, diags
@@ -255,7 +255,7 @@ func (m *repositorySecretResourceModelV1) toWoodpeckerModel(
 		Name:  m.Name.ValueString(),
 		Value: m.Value.ValueString(),
 	}
-	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, false)...)
+	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, true)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
 
 	return secret, diags
