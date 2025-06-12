@@ -2,9 +2,9 @@
 
 A Terraform provider used to interact with [Woodpecker CI](https://woodpecker-ci.org/) resources.
 
-## Developing the provider
+## Local development
 
-**Requirements:**
+**Prerequisites:**
 
 - [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.23
