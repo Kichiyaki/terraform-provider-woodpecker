@@ -17,12 +17,12 @@ install-git-hooks:
 .PHONY: install-tfplugindocs
 install-tfplugindocs:
 	@echo "Installing github.com/hashicorp/terraform-plugin-docs..."
-	@(test -f $(TFPLUGINDOCS_PATH) && echo "github.com/hashicorp/terraform-plugin-docs is already installed. Skipping...") || (wget -q -O $(TFPLUGINDOCS_PATH).zip https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.21.0/tfplugindocs_0.21.0_$(GOOS)_$(GOARCH).zip && unzip $(TFPLUGINDOCS_PATH).zip tfplugindocs -d $(GOBIN) && rm $(TFPLUGINDOCS_PATH).zip)
+	@(test -f $(TFPLUGINDOCS_PATH) && echo "github.com/hashicorp/terraform-plugin-docs is already installed. Skipping...") || (wget -q -O $(TFPLUGINDOCS_PATH).zip https://github.com/hashicorp/terraform-plugin-docs/releases/download/v0.22.0/tfplugindocs_0.22.0_$(GOOS)_$(GOARCH).zip && unzip $(TFPLUGINDOCS_PATH).zip tfplugindocs -d $(GOBIN) && rm $(TFPLUGINDOCS_PATH).zip)
 
 .PHONY: install-golangci-lint
 install-golangci-lint:
 	@echo "Installing github.com/golangci/golangci-lint..."
-	@(test -f $(GOLANGCI_LINT_PATH) && echo "github.com/golangci/golangci-lint is already installed. Skipping...") || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v2.1.6
+	@(test -f $(GOLANGCI_LINT_PATH) && echo "github.com/golangci/golangci-lint is already installed. Skipping...") || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v2.2.1
 
 .PHONY: install-tools
 install-tools: install-golangci-lint install-tfplugindocs
