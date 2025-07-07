@@ -174,7 +174,7 @@ func (r giteaResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultGiteaImage = "gitea/gitea:1.23"
+const defaultGiteaImage = "gitea/gitea:1.24"
 
 //nolint:nonamedreturns
 func getGiteaRepoTag() (repository string, tag string) {
@@ -348,7 +348,7 @@ func (r woodpeckerResource) Close() error {
 	return r.docker.Close()
 }
 
-const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v3.6.0"
+const defaultWoodpeckerImage = "woodpeckerci/woodpecker-server:v3.8.0"
 
 //nolint:nonamedreturns
 func getWoodpeckerRepoTag() (repo string, tag string) {
