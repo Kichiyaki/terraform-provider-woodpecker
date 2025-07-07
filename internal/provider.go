@@ -202,7 +202,7 @@ func newClient(
 			"Woodpecker version doesn't satisfy the constraint",
 			fmt.Sprintf(
 				"Current woodpecker version: %s, expected: %s."+
-					" Consider using an older version of the provider or update woodpecker.",
+					" Consider using an older version of the provider or update your Woodpecker CI instance.",
 				ver.Version,
 				c.String(),
 			),

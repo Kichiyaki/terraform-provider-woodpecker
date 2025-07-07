@@ -191,7 +191,7 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 			"require_approval": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
-				Description: "Prevent malicious pipelines from exposing secrets or " +
+				Description: "Prevents malicious pipelines from exposing secrets or " +
 					"running harmful tasks by approving them before execution. " +
 					fmt.Sprintf(
 						"Allowed values: %s, %s, %s",
@@ -208,6 +208,15 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 						woodpecker.ApprovalModePullRequests.String(),
 						woodpecker.ApprovalModeAllEvents.String(),
 					),
+				},
+			},
+			"approval_allowed_users": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+				Description: "the list of users who's pipelines never require an approval",
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"is_active": schema.BoolAttribute{
@@ -238,7 +247,7 @@ func (r *repositoryResource) Schema(_ context.Context, _ resource.SchemaRequest,
 				Optional: true,
 				Computed: true,
 				Description: "The path to the pipeline config file or folder. " +
-					"By default it is left empty which will use the following configuration " +
+					"By default, it is left empty which will use the following configuration " +
 					"resolution .woodpecker/*.yml -> .woodpecker/*.yaml -> .woodpecker.yml -> .woodpecker.yaml.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),

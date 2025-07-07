@@ -85,6 +85,7 @@ type (
 		IsSCMPrivate                 bool                 `json:"private"`
 		Trusted                      TrustedConfiguration `json:"trusted"`
 		RequireApproval              ApprovalMode         `json:"require_approval"`
+		ApprovalAllowedUsers         []string             `json:"approval_allowed_users"`
 		IsActive                     bool                 `json:"active"`
 		AllowPullRequests            bool                 `json:"allow_pr"`
 		AllowDeployments             bool                 `json:"allow_deploy"`
@@ -109,6 +110,7 @@ type (
 		AllowDeployments             *bool                      `json:"allow_deploy,omitempty"`
 		CancelPreviousPipelineEvents []string                   `json:"cancel_previous_pipeline_events,omitempty"`
 		NetrcTrustedPlugins          []string                   `json:"netrc_trusted,omitempty"`
+		ApprovalAllowedUsers         []string                   `json:"approval_allowed_users,omitempty"`
 		Trusted                      *TrustedConfigurationPatch `json:"trusted,omitempty"`
 	}
 

@@ -122,6 +122,7 @@ type repositoryModel struct {
 	IsPrivate                    types.Bool   `tfsdk:"is_private"`
 	Trusted                      types.Object `tfsdk:"trusted"`
 	RequireApproval              types.String `tfsdk:"require_approval"`
+	ApprovalAllowedUsers         types.Set    `tfsdk:"approval_allowed_users"`
 	IsActive                     types.Bool   `tfsdk:"is_active"`
 	AllowPullRequests            types.Bool   `tfsdk:"allow_pull_requests"`
 	AllowDeployments             types.Bool   `tfsdk:"allow_deployments"`
@@ -171,6 +172,8 @@ func (m *repositoryModel) setValues(ctx context.Context, repo *woodpecker.Repo) 
 	diagsRes.Append(diags...)
 	m.NetrcTrustedPlugins, diags = types.SetValueFrom(ctx, types.StringType, repo.NetrcTrustedPlugins)
 	diagsRes.Append(diags...)
+	m.ApprovalAllowedUsers, diags = types.SetValueFrom(ctx, types.StringType, repo.ApprovalAllowedUsers)
+	diagsRes.Append(diags...)
 
 	return diagsRes
 }
@@ -198,6 +201,7 @@ func (m *repositoryModel) toWoodpeckerPatch(ctx context.Context) (*woodpecker.Re
 
 	diags.Append(m.CancelPreviousPipelineEvents.ElementsAs(ctx, &repo.CancelPreviousPipelineEvents, false)...)
 	diags.Append(m.NetrcTrustedPlugins.ElementsAs(ctx, &repo.NetrcTrustedPlugins, true)...)
+	diags.Append(m.ApprovalAllowedUsers.ElementsAs(ctx, &repo.ApprovalAllowedUsers, true)...)
 
 	var trusted *trustedConfigurationPatchModel
 	diags.Append(m.Trusted.As(ctx, &trusted, basetypes.ObjectAsOptions{UnhandledUnknownAsEmpty: true})...)

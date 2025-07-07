@@ -29,10 +29,11 @@ data "woodpecker_repository" "test_repo" {
 
 - `allow_deployments` (Boolean) Enables a pipeline to be started with the deploy event from a successful pipeline.
 - `allow_pull_requests` (Boolean) Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.
+- `approval_allowed_users` (Set of String) the list of users who's pipelines never require an approval
 - `avatar_url` (String) the repository's avatar URL
 - `cancel_previous_pipeline_events` (Set of String) Enables to cancel pending and running pipelines of the same event and context before starting the newly triggered one (push, tag, pull_request, deployment).
 - `clone_url` (String) the URL to clone repository
-- `config_file` (String) The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution .woodpecker/*.yml -> .woodpecker/*.yaml -> .woodpecker.yml -> .woodpecker.yaml.
+- `config_file` (String) The path to the pipeline config file or folder. By default, it is left empty which will use the following configuration resolution .woodpecker/*.yml -> .woodpecker/*.yaml -> .woodpecker.yml -> .woodpecker.yaml.
 - `default_branch` (String) the name of the default branch
 - `forge_id` (Number) the forge's id
 - `forge_remote_id` (String) the unique identifier for the repository on the forge
@@ -43,7 +44,7 @@ data "woodpecker_repository" "test_repo" {
 - `name` (String) the name of the repository
 - `netrc_trusted_plugins` (Set of String) Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge.
 - `owner` (String) the owner of the repository
-- `require_approval` (String) Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution. Allowed values: forks, pull_requests, all_events
+- `require_approval` (String) Prevents malicious pipelines from exposing secrets or running harmful tasks by approving them before execution. Allowed values: forks, pull_requests, all_events
 - `timeout` (Number) after this timeout a pipeline has to finish or will be treated as timed out (in minutes)
 - `trusted` (Attributes) (see [below for nested schema](#nestedatt--trusted))
 - `visibility` (String) project visibility (public, private, internal), see [the docs](https://woodpecker-ci.org/docs/usage/project-settings#project-visibility) for more info

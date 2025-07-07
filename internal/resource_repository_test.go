@@ -159,8 +159,9 @@ resource "woodpecker_repository" "test_repo" {
 	}
 	cancel_previous_pipeline_events = ["%s"]
 	netrc_trusted_plugins = ["woodpeckerci/plugin-docker-buildx"]
+	approval_allowed_users = ["%s"]
 }
-`, repo1.FullName, woodpecker.EventTag),
+`, repo1.FullName, woodpecker.EventTag, repo1.Owner.UserName),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttrSet("woodpecker_repository.test_repo", "id"),
 						resource.TestCheckResourceAttrSet("woodpecker_repository.test_repo", "forge_id"),
@@ -208,6 +209,11 @@ resource "woodpecker_repository" "test_repo" {
 							"woodpecker_repository.test_repo",
 							"netrc_trusted_plugins.*",
 							"woodpeckerci/plugin-docker-buildx",
+						),
+						resource.TestCheckTypeSetElemAttr(
+							"woodpecker_repository.test_repo",
+							"approval_allowed_users.*",
+							repo1.Owner.UserName,
 						),
 					),
 				},
