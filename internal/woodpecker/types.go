@@ -310,8 +310,9 @@ type (
 
 	// Org is the JSON data for an organization.
 	Org struct {
-		ID     int64  `json:"id"`
-		Name   string `json:"name"`
-		IsUser bool   `json:"is_user"`
+		ID      int64  `json:"id"`
+		ForgeID int64  `json:"forge_id"`
+		Name    string `json:"name"`
+		IsUser  bool   `json:"is_user"`
 	}
 )

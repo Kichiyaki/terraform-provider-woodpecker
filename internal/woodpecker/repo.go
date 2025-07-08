@@ -51,6 +51,10 @@ type SecretListOptions struct {
 	ListOptions
 }
 
+type OrgListOptions struct {
+	ListOptions
+}
+
 type DeployOptions struct {
 	DeployTo string            // override the target deploy value
 	Params   map[string]string // custom KEY=value parameters to be injected into the step environment

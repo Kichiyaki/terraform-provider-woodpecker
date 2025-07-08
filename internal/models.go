@@ -106,6 +106,21 @@ func (m *secretDataSourceModel) setValues(ctx context.Context, secret *woodpecke
 	return diagsRes
 }
 
+type orgModel struct {
+	ID      types.Int64  `tfsdk:"id"`
+	ForgeID types.Int64  `tfsdk:"forge_id"`
+	Name    types.String `tfsdk:"name"`
+	IsUser  types.Bool   `tfsdk:"is_user"`
+}
+
+func (m *orgModel) setValues(_ context.Context, repo *woodpecker.Org) diag.Diagnostics {
+	m.ID = types.Int64Value(repo.ID)
+	m.ForgeID = types.Int64Value(repo.ForgeID)
+	m.Name = types.StringValue(repo.Name)
+	m.IsUser = types.BoolValue(repo.IsUser)
+	return nil
+}
+
 type repositoryModel struct {
 	ID                           types.Int64  `tfsdk:"id"`
 	ForgeID                      types.Int64  `tfsdk:"forge_id"`

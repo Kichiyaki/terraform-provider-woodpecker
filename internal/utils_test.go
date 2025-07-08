@@ -33,6 +33,42 @@ func createRepo(tb testing.TB) *gitea.Repository {
 	return repo
 }
 
+func createOrgRepo(tb testing.TB) *gitea.Repository {
+	tb.Helper()
+
+	org, _, err := giteaClient.CreateOrg(gitea.CreateOrgOption{
+		Name:                      uuid.NewString(),
+		FullName:                  uuid.NewString(),
+		Visibility:                gitea.VisibleTypePublic,
+		RepoAdminChangeTeamAccess: true,
+	})
+	if err != nil {
+		tb.Fatalf("got unexpected error while creating org: %s", err)
+	}
+	tb.Cleanup(func() {
+		_, _ = giteaClient.DeleteOrg(org.UserName)
+	})
+
+	repo, _, err := giteaClient.CreateOrgRepo(org.UserName, gitea.CreateRepoOption{
+		Name:          uuid.NewString(),
+		Description:   uuid.NewString(),
+		Private:       false,
+		AutoInit:      true,
+		Template:      false,
+		License:       "MIT",
+		Readme:        "Default",
+		DefaultBranch: "master",
+	})
+	if err != nil {
+		tb.Fatalf("got unexpected error while creating repo: %s", err)
+	}
+	tb.Cleanup(func() {
+		_, _ = giteaClient.DeleteRepo(repo.Owner.UserName, repo.Name)
+	})
+
+	return repo
+}
+
 func createBranch(tb testing.TB, repo *gitea.Repository) *gitea.Branch {
 	tb.Helper()
 
