@@ -160,6 +160,28 @@ func (m *orgSecretResourceModel) toWoodpeckerModel(
 	return secret, diags
 }
 
+type orgSecretDataSourceModel struct {
+	ID     types.Int64  `tfsdk:"id"`
+	OrgID  types.Int64  `tfsdk:"org_id"`
+	Name   types.String `tfsdk:"name"`
+	Images types.Set    `tfsdk:"images"`
+	Events types.Set    `tfsdk:"events"`
+}
+
+func (m *orgSecretDataSourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+	var diagsRes diag.Diagnostics
+	var diags diag.Diagnostics
+
+	m.ID = types.Int64Value(secret.ID)
+	m.Name = types.StringValue(secret.Name)
+	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
+	diagsRes.Append(diags...)
+	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
+	diagsRes.Append(diags...)
+
+	return diagsRes
+}
+
 type repositoryModel struct {
 	ID                           types.Int64  `tfsdk:"id"`
 	ForgeID                      types.Int64  `tfsdk:"forge_id"`
