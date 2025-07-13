@@ -121,6 +121,45 @@ func (m *orgModel) setValues(_ context.Context, repo *woodpecker.Org) diag.Diagn
 	return nil
 }
 
+type orgSecretResourceModel struct {
+	ID     types.Int64  `tfsdk:"id"`
+	OrgID  types.Int64  `tfsdk:"org_id"`
+	Name   types.String `tfsdk:"name"`
+	Value  types.String `tfsdk:"value"`
+	Images types.Set    `tfsdk:"images"`
+	Events types.Set    `tfsdk:"events"`
+}
+
+func (m *orgSecretResourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
+	var diagsRes diag.Diagnostics
+	var diags diag.Diagnostics
+
+	m.ID = types.Int64Value(secret.ID)
+	m.Name = types.StringValue(secret.Name)
+	m.Images, diags = types.SetValueFrom(ctx, types.StringType, secret.Images)
+	diagsRes.Append(diags...)
+	m.Events, diags = types.SetValueFrom(ctx, types.StringType, secret.Events)
+	diagsRes.Append(diags...)
+
+	return diagsRes
+}
+
+func (m *orgSecretResourceModel) toWoodpeckerModel(
+	ctx context.Context,
+) (*woodpecker.Secret, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	secret := &woodpecker.Secret{
+		ID:    m.ID.ValueInt64(),
+		Name:  m.Name.ValueString(),
+		Value: m.Value.ValueString(),
+	}
+	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, true)...)
+	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
+
+	return secret, diags
+}
+
 type repositoryModel struct {
 	ID                           types.Int64  `tfsdk:"id"`
 	ForgeID                      types.Int64  `tfsdk:"forge_id"`

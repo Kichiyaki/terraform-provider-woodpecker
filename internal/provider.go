@@ -78,6 +78,7 @@ func (p *woodpeckerProvider) Resources(_ context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		newUserResource,
 		newSecretResource,
+		newOrgSecretResource,
 		newRepositoryResource,
 		newRepositorySecretResource,
 		newRepositoryCronResource,

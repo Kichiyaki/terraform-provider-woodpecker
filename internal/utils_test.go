@@ -69,6 +69,20 @@ func createOrgRepo(tb testing.TB) *gitea.Repository {
 	return repo
 }
 
+func createOrg(tb testing.TB) *woodpecker.Org {
+	tb.Helper()
+
+	repo := createOrgRepo(tb)
+	activateRepo(tb, repo)
+
+	org, err := woodpeckerClient.OrgLookup(repo.Owner.UserName)
+	if err != nil {
+		tb.Fatalf("got unexpected error while looking up org: %s", err)
+	}
+
+	return org
+}
+
 func createBranch(tb testing.TB, repo *gitea.Repository) *gitea.Branch {
 	tb.Helper()
 
