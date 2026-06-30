@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/Kichiyaki/terraform-provider-woodpecker/internal/woodpecker"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -26,6 +28,7 @@ type orgSecretResource struct {
 
 var _ resource.Resource = (*orgSecretResource)(nil)
 var _ resource.ResourceWithConfigure = (*orgSecretResource)(nil)
+var _ resource.ResourceWithConfigValidators = (*orgSecretResource)(nil)
 var _ resource.ResourceWithImportState = (*orgSecretResource)(nil)
 
 func newOrgSecretResource() resource.Resource {
@@ -70,11 +73,27 @@ func (r *orgSecretResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 				},
 			},
 			"value": schema.StringAttribute{
-				Required:    true,
-				Description: "the value of the secret",
+				Optional:    true,
+				Description: "the value of the secret. Stored in state; use value_wo to avoid that. Conflicts with value_wo.",
 				Sensitive:   true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"value_wo": schema.StringAttribute{
+				Optional:  true,
+				Sensitive: true,
+				WriteOnly: true,
+				Description: "the value of the secret, supplied as a write-only attribute so it's never " +
+					"persisted in state. Conflicts with value. Requires Terraform 1.11+ or OpenTofu 1.11+. " +
+					"Pair with value_wo_version to push new values.",
+			},
+			"value_wo_version": schema.Int64Attribute{
+				Optional: true,
+				Description: "the version of value_wo. Since write-only values aren't stored in state, " +
+					"increment this whenever value_wo changes to push the new value to Woodpecker.",
+				Validators: []validator.Int64{
+					int64validator.AlsoRequires(path.MatchRoot("value_wo")),
 				},
 			},
 			"events": schema.SetAttribute{
@@ -139,6 +158,15 @@ func (r *orgSecretResource) Configure(
 	r.client = client
 }
 
+func (r *orgSecretResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.ExactlyOneOf(
+			path.MatchRoot("value"),
+			path.MatchRoot("value_wo"),
+		),
+	}
+}
+
 func (r *orgSecretResource) Create(
 	ctx context.Context,
 	req resource.CreateRequest,
@@ -167,6 +195,9 @@ func (r *orgSecretResource) Create(
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Write-only values must never be persisted in state.
+	data.ValueWO = types.StringNull()
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -204,6 +235,12 @@ func (r *orgSecretResource) Update(
 		return
 	}
 
+	// Write-only values are null in the plan; read value_wo from the config.
+	resp.Diagnostics.Append(req.Config.GetAttribute(ctx, path.Root("value_wo"), &data.ValueWO)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	wData, diags := data.toWoodpeckerModel(ctx)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -220,6 +257,9 @@ func (r *orgSecretResource) Update(
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Write-only values must never be persisted in state.
+	data.ValueWO = types.StringNull()
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

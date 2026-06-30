@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 func TestOrgSecretResource(t *testing.T) {
@@ -194,6 +195,96 @@ resource "woodpecker_org_secret" "test_secret" {
 }
 `, uuid.NewString()),
 					ExpectError: regexp.MustCompile(`Attribute events\[Value\("random"\)] value must be one of`),
+				},
+			},
+		})
+	})
+}
+
+func TestOrgSecretResourceWriteOnly(t *testing.T) {
+	t.Parallel()
+
+	t.Run("OK", func(t *testing.T) {
+		t.Parallel()
+
+		org := createOrg(t)
+
+		name := uuid.NewString()
+
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { testAccPreCheck(t) },
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_11_0),
+			},
+			CheckDestroy: checkOrgSecretResourceDestroy(map[int64][]string{
+				org.ID: {name},
+			}),
+			Steps: []resource.TestStep{
+				{ // create secret with a write-only value
+					Config: fmt.Sprintf(`
+resource "woodpecker_org_secret" "test_secret" {
+	org_id = %d
+	name = "%s"
+	value_wo = "test123"
+	value_wo_version = 1
+	events = ["%s"]
+}
+`, org.ID, name, woodpecker.EventPush),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttrSet("woodpecker_org_secret.test_secret", "id"),
+						resource.TestCheckResourceAttr("woodpecker_org_secret.test_secret", "name", name),
+						resource.TestCheckResourceAttr("woodpecker_org_secret.test_secret", "value_wo_version", "1"),
+						resource.TestCheckNoResourceAttr("woodpecker_org_secret.test_secret", "value"),
+						resource.TestCheckNoResourceAttr("woodpecker_org_secret.test_secret", "value_wo"),
+						resource.TestCheckTypeSetElemAttr("woodpecker_org_secret.test_secret", "events.*", woodpecker.EventPush),
+					),
+				},
+				{ // rotate the write-only value by bumping its version (in-place update)
+					Config: fmt.Sprintf(`
+resource "woodpecker_org_secret" "test_secret" {
+	org_id = %d
+	name = "%s"
+	value_wo = "test123123"
+	value_wo_version = 2
+	events = ["%s"]
+}
+`, org.ID, name, woodpecker.EventPush),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction(
+								"woodpecker_org_secret.test_secret",
+								plancheck.ResourceActionUpdate,
+							),
+						},
+					},
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("woodpecker_org_secret.test_secret", "value_wo_version", "2"),
+						resource.TestCheckNoResourceAttr("woodpecker_org_secret.test_secret", "value_wo"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("ERR: value and value_wo are mutually exclusive", func(t *testing.T) {
+		t.Parallel()
+
+		resource.Test(t, resource.TestCase{
+			PreCheck:                 func() { testAccPreCheck(t) },
+			ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+			Steps: []resource.TestStep{
+				{
+					Config: fmt.Sprintf(`
+resource "woodpecker_org_secret" "test_secret" {
+	org_id = 123
+	name = "%s"
+	value = "test123"
+	value_wo = "test123"
+	events = ["%s"]
+}
+`, uuid.NewString(), woodpecker.EventPush),
+					ExpectError: regexp.MustCompile("Invalid Attribute Combination"),
 				},
 			},
 		})
