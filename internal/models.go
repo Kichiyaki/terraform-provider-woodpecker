@@ -49,12 +49,23 @@ type secretResourceModelV0 struct {
 	Events      types.Set    `tfsdk:"events"`
 }
 
+// secretValue returns the write-only value when it's set, otherwise the
+// regular value attribute. Write-only values are never stored in state.
+func secretValue(value, valueWO types.String) string {
+	if !valueWO.IsNull() {
+		return valueWO.ValueString()
+	}
+	return value.ValueString()
+}
+
 type secretResourceModelV1 struct {
-	ID     types.Int64  `tfsdk:"id"`
-	Name   types.String `tfsdk:"name"`
-	Value  types.String `tfsdk:"value"`
-	Images types.Set    `tfsdk:"images"`
-	Events types.Set    `tfsdk:"events"`
+	ID             types.Int64  `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	Value          types.String `tfsdk:"value"`
+	ValueWO        types.String `tfsdk:"value_wo"`
+	ValueWOVersion types.Int64  `tfsdk:"value_wo_version"`
+	Images         types.Set    `tfsdk:"images"`
+	Events         types.Set    `tfsdk:"events"`
 }
 
 func (m *secretResourceModelV1) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
@@ -77,7 +88,7 @@ func (m *secretResourceModelV1) toWoodpeckerModel(ctx context.Context) (*woodpec
 	secret := &woodpecker.Secret{
 		ID:    m.ID.ValueInt64(),
 		Name:  m.Name.ValueString(),
-		Value: m.Value.ValueString(),
+		Value: secretValue(m.Value, m.ValueWO),
 	}
 	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, true)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
@@ -122,12 +133,14 @@ func (m *orgModel) setValues(_ context.Context, repo *woodpecker.Org) diag.Diagn
 }
 
 type orgSecretResourceModel struct {
-	ID     types.Int64  `tfsdk:"id"`
-	OrgID  types.Int64  `tfsdk:"org_id"`
-	Name   types.String `tfsdk:"name"`
-	Value  types.String `tfsdk:"value"`
-	Images types.Set    `tfsdk:"images"`
-	Events types.Set    `tfsdk:"events"`
+	ID             types.Int64  `tfsdk:"id"`
+	OrgID          types.Int64  `tfsdk:"org_id"`
+	Name           types.String `tfsdk:"name"`
+	Value          types.String `tfsdk:"value"`
+	ValueWO        types.String `tfsdk:"value_wo"`
+	ValueWOVersion types.Int64  `tfsdk:"value_wo_version"`
+	Images         types.Set    `tfsdk:"images"`
+	Events         types.Set    `tfsdk:"events"`
 }
 
 func (m *orgSecretResourceModel) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
@@ -152,7 +165,7 @@ func (m *orgSecretResourceModel) toWoodpeckerModel(
 	secret := &woodpecker.Secret{
 		ID:    m.ID.ValueInt64(),
 		Name:  m.Name.ValueString(),
-		Value: m.Value.ValueString(),
+		Value: secretValue(m.Value, m.ValueWO),
 	}
 	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, true)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
@@ -303,12 +316,14 @@ type repositorySecretResourceModelV0 struct {
 }
 
 type repositorySecretResourceModelV1 struct {
-	ID           types.Int64  `tfsdk:"id"`
-	RepositoryID types.Int64  `tfsdk:"repository_id"`
-	Name         types.String `tfsdk:"name"`
-	Value        types.String `tfsdk:"value"`
-	Images       types.Set    `tfsdk:"images"`
-	Events       types.Set    `tfsdk:"events"`
+	ID             types.Int64  `tfsdk:"id"`
+	RepositoryID   types.Int64  `tfsdk:"repository_id"`
+	Name           types.String `tfsdk:"name"`
+	Value          types.String `tfsdk:"value"`
+	ValueWO        types.String `tfsdk:"value_wo"`
+	ValueWOVersion types.Int64  `tfsdk:"value_wo_version"`
+	Images         types.Set    `tfsdk:"images"`
+	Events         types.Set    `tfsdk:"events"`
 }
 
 func (m *repositorySecretResourceModelV1) setValues(ctx context.Context, secret *woodpecker.Secret) diag.Diagnostics {
@@ -333,7 +348,7 @@ func (m *repositorySecretResourceModelV1) toWoodpeckerModel(
 	secret := &woodpecker.Secret{
 		ID:    m.ID.ValueInt64(),
 		Name:  m.Name.ValueString(),
-		Value: m.Value.ValueString(),
+		Value: secretValue(m.Value, m.ValueWO),
 	}
 	diags.Append(m.Images.ElementsAs(ctx, &secret.Images, true)...)
 	diags.Append(m.Events.ElementsAs(ctx, &secret.Events, false)...)
