@@ -16,23 +16,23 @@ jobs:
     runs-on: ubuntu-latest
     services:
       dind:
-        image: docker:27-dind-rootless
+        image: docker:29-dind-rootless
         ports:
           - 2375:2375
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
           cache: true
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - run: make generate && go mod tidy && git diff --exit-code go.mod docs/ examples/
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.2
+          version: v2.12
       - name: Gitea 1.24 & Woodpecker 3.8
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
         env:

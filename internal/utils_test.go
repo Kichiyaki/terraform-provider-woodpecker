@@ -46,10 +46,10 @@ func createOrgRepo(tb testing.TB) *gitea.Repository {
 		tb.Fatalf("got unexpected error while creating org: %s", err)
 	}
 	tb.Cleanup(func() {
-		_, _ = giteaClient.DeleteOrg(org.UserName)
+		_, _ = giteaClient.DeleteOrg(org.Name)
 	})
 
-	repo, _, err := giteaClient.CreateOrgRepo(org.UserName, gitea.CreateRepoOption{
+	repo, _, err := giteaClient.CreateOrgRepo(org.Name, gitea.CreateRepoOption{
 		Name:          uuid.NewString(),
 		Description:   uuid.NewString(),
 		Private:       false,

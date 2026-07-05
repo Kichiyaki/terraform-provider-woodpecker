@@ -57,6 +57,7 @@ linters:
     - usestdlibvars
     - usetesting
     - wastedassign
+    - modernize
   settings:
     depguard:
       rules:
